@@ -30,7 +30,6 @@ SimpleMapDiagram.prototype = {
         mapSetUp(width, height, title, this.id)
         initializeNodes(width, height, this.nodes, this.id)
         initializeControlBox(this.id)
-        console.log(this.nodes)
     },
 
     /* add a connection between nodes (x1, y1) and (x2, y2) */
@@ -108,20 +107,20 @@ SimpleMapDiagram.prototype = {
     },
 
     /* add a filter box which will give users the option to filter by certain place type */
-    addFilterByClassBox: function(options) {
+    addFilterByClassBox: function(title, description, options) {
         // if no options are given, default to include all
         if (!options) {
             options = getAllItemClasses(this.blockPlaces)
         }
-        addFilterBox(options, this.blockPlaces, getAllPlacesByClass, this.id)
+        addFilterBox(options, title, description, this.blockPlaces, getAllPlacesByClass, this.id)
     },
 
     /* add a filter box which will give users the option to filter by certain place type */
-    addFilterByNameBox: function(options) {
+    addFilterByNameBox: function(title, description, options) {
         if (!options) {
             options = getAllItemNames(this.blockPlaces)
         }
-        addFilterBox(options, this.blockPlaces, getPlaceByName, this.id)
+        addFilterBox(options, title, description, this.blockPlaces, getPlaceByName, this.id)
     }
 }
 
@@ -177,19 +176,42 @@ function getAllItemNames(elements) {
 function mapSetUp(width, height, title, id) {
     const body = $('body')
 
+    // create a container for this Simple Map Diagram
+    const container = document.createElement('div')
+    container.id = id + '.SMDcontainer'
+    container.className = 'SMDcontainer'
+    body.append(container)
+
+    // create a container for the control menus
+    const controlCentre = document.createElement('div')
+    controlCentre.id = id + '.controlCentre'
+    controlCentre.className = 'controlContainer'
+    container.append(controlCentre)
+
+    // create a title and subtitle
+    const titleContainer = document.createElement('div')
+
+    const titleElement = document.createElement('h3')
+    titleElement.append(document.createTextNode(title))
+
+    const subtitle = document.createElement('p')
+    subtitle.className = 'controlLabel'
+    subtitle.append(document.createTextNode('This is a sample use case demonstrating a use case of the Simple Map Diagrams library, showing a campus map.'))
+
+    titleContainer.id = id + '.titleContainer'
+    titleContainer.className = 'titleContainer'
+    titleContainer.append(titleElement)
+    titleContainer.append(subtitle)
+    container.append(titleContainer)
+
     // create a container for the map
     const mapContainer = document.createElement('div')
     mapContainer.id = id + '.mapContainer'
     mapContainer.className = 'mapContainer'
     mapContainer.style.height = (height * 50 + 60) + 'px'
     mapContainer.style.width = (width * 50 + 60) + 'px'
-    body.append(mapContainer)
-
-    // create a title
-    const titleElement = document.createElement('h3')
-    titleElement.append(document.createTextNode(title))
-    mapContainer.append(titleElement)
-
+    container.append(mapContainer)
+    
     // create a container for the nodes
     const nodes = document.createElement('div')
     nodes.id = id + '.nodes'
@@ -206,11 +228,6 @@ function mapSetUp(width, height, title, id) {
     const nodePlaces = document.createElement('div')
     nodePlaces.id = id + '.nodePlacesContainer'
 
-    // create a container for the control menus
-    const controlCentre = document.createElement('div')
-    controlCentre.id = id + '.controlCentre'
-    body.append(controlCentre)
-
     // add to the main map container
     mapContainer.appendChild(nodes)
     mapContainer.appendChild(connections)
@@ -223,17 +240,12 @@ function mapSetUp(width, height, title, id) {
 function initializeControlBox(id) {
     const controlCentre = document.getElementById(id + '.controlCentre')
     const controlBox = document.createElement('div')
-    
-    // title
-    const title = document.createElement('h4')
-    title.append(document.createTextNode('Currently selected:'))
-    controlBox.append(title)
     controlBox.className = 'controlBox'
 
     // labels to display information
-    const infoLabel = document.createElement('p')
+    const infoLabel = document.createElement('h3')
     infoLabel.id = id + '.selectedLabel'
-    infoLabel.className = 'controlLabel'
+    infoLabel.append(document.createTextNode('Click an item to start.'))
     const descriptionLabel = document.createElement('p')
     descriptionLabel.id = id + '.descLabel'
     descriptionLabel.className = 'controlLabel'
@@ -320,6 +332,12 @@ function createBlockPlace(place, id) {
     block.style.top = (place.y * 50 + 60) + 'px'
     blockPlacesContainer.append(block)
 
+    // add a label
+    const label = document.createElement('label')
+    label.appendChild(document.createTextNode(place.name))
+    label.className = 'placeLabel'
+    block.append(label)
+
     // when the place is clicked, display its information
     block.addEventListener('click', function(e) {
         const infoLabel = document.getElementById(id + '.selectedLabel')
@@ -327,12 +345,6 @@ function createBlockPlace(place, id) {
         infoLabel.textContent = place.name
         descriptionLabel.textContent = place.description
     })
-
-    // add a label
-    const label = document.createElement('label')
-    label.appendChild(document.createTextNode(place.name))
-    label.className = 'placeLabel'
-    block.append(label)
 }
 
 /* function to add a line place to the map (i.e., a place that fits on a connection) */
@@ -355,14 +367,6 @@ function createLinePlace(place, id) {
         height = ((place.y2 - place.y1) * 50)
     }
 
-    // when the place is clicked, display its information
-    line.addEventListener('click', function(e) {
-        const infoLabel = document.getElementById(id + '.selectedLabel')
-        const descriptionLabel = document.getElementById(id + '.descLabel')
-        infoLabel.textContent = place.name
-        descriptionLabel.textContent = place.description
-    })
-
     // create the element
     line.style.width = width + 'px'
     line.style.height = height + 'px'
@@ -376,6 +380,14 @@ function createLinePlace(place, id) {
     label.className = ('placeLabel')
     line.append(label)
     linePlacesContainer.append(line)
+
+    // when the place is clicked, display its information
+    line.addEventListener('click', function(e) {
+        const infoLabel = document.getElementById(id + '.selectedLabel')
+        const descriptionLabel = document.getElementById(id + '.descLabel')
+        infoLabel.textContent = place.name
+        descriptionLabel.textContent = place.description
+    })
 }
 
 /* function to add a node place to the map (i.e., a place that falls on a node) */
@@ -391,6 +403,13 @@ function createNodePlace(place, id) {
     node.classList.add('node')
     node.classList.add(place.class)
     
+    // add a label
+    const label = document.createElement('label')
+    label.appendChild(document.createTextNode(place.name))
+    label.className = 'placeLabel'
+    node.append(label)
+    nodePlacesContainer.append(node)
+
     // when the place is clicked, display its information
     node.addEventListener('click', function(e) {
         const infoLabel = document.getElementById(id + '.selectedLabel')
@@ -398,13 +417,6 @@ function createNodePlace(place, id) {
         infoLabel.textContent = place.name
         descriptionLabel.textContent = place.description
     })
-
-    // add a label
-    const label = document.createElement('label')
-    label.appendChild(document.createTextNode(place.name))
-    label.className = 'placeLabel'
-    node.append(label)
-    nodePlacesContainer.append(node)
 }
 
 /* function to toggle highlight on a block place with given id */
@@ -418,7 +430,7 @@ function toggleHighlightBlockPlace(id) {
 }
 
 /* function to add a menu to filter places by type */
-function addFilterBox(options, places, elementGetter, id) {
+function addFilterBox(options, title, description, places, elementGetter, id) {
     const controlCentre = document.getElementById(id + '.controlCentre')
     const filterBox = document.createElement('div')
     filterBox.className = 'controlBox'
@@ -426,10 +438,10 @@ function addFilterBox(options, places, elementGetter, id) {
     
     // add a title
     const label = document.createElement('h3')
-    label.append(document.createTextNode('Highlight:'))
+    label.append(document.createTextNode(title))
     const instruction = document.createElement('p')
     instruction.className = 'controlLabel'
-    instruction.append(document.createTextNode('Click to highlight on the map.'))
+    instruction.append(document.createTextNode(description))
     filterBox.append(label)
     filterBox.append(instruction)
 

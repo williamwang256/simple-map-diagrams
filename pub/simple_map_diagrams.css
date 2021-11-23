@@ -1,10 +1,3 @@
-
-body {
-    background-color: white;
-    margin: 40px;
-    font-family: "Helvetica Neue", Helvetica, sans-serif;
-}
-
 ul li {
     list-style: none;
 }
@@ -61,6 +54,16 @@ ul li {
     background-color: white;
 }
 
+.specialEvent {
+    border: 3px solid palevioletred;
+    background-color: purple;
+}
+
+.incident {
+    border: 3px solid orange;
+    background-color: orangered;
+}
+
 .intersection {
     border: 3px solid darkgray;
     background-color: grey;
@@ -68,11 +71,21 @@ ul li {
 
 /* shadow on mouseover for all added places*/
 .poi:hover, .street:hover, .park:hover, 
-.building:hover, .water:hover, .transitLine:hover {
+.building:hover, .water:hover, .transitLine:hover, 
+.specialEvent:hover, .incident:hover {
     box-shadow: 0 0 10px #888888;
 }
 
 /* containers css */
+
+.SMDcontainer {
+    border: 3px solid grey;
+    position: relative;
+    overflow: auto;
+    width: auto;
+    padding: 5px;
+    margin: 50px;
+}
 
 .mapContainer {
     position: relative;
@@ -80,6 +93,14 @@ ul li {
     padding: 5px;
     float:left;
     background-color: rgb(229, 234, 240);
+    margin:5px;
+}
+
+.titleContainer {
+    position: relative;
+    padding: 5px;
+    float:left;
+    margin:5px;
 }
 
 .controlBox {
@@ -88,12 +109,17 @@ ul li {
     width: 300px;
     height: auto;
     padding: 20px;
-    float:left
+    margin:5px;
+    }
+
+.controlContainer {
+    float: left;
 }
 
 /* misc. css */
 
 .highlight {
+    font-weight: bold;
     box-shadow: 0 0 20px red;
 }
 

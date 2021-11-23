@@ -21,16 +21,18 @@ smd.addMultipleConnections([
 ])
 
 // add some block places
-smd.addBlockPlace(4, 2, 1, 2, 'central park', 'park')
-smd.addBlockPlace(0, 1, 1, 1, 'north park', 'park')
-smd.addBlockPlace(3, 3, 1, 1, 'uoft', 'building')
-smd.addBlockPlace(7, 3, 1, 1, 'pond', 'water')
+smd.addBlockPlace(4, 2, 1, 2, 'Central Park', 'park')
+smd.addBlockPlace(0, 1, 1, 1, 'North Park', 'park')
+smd.addBlockPlace(3, 3, 1, 1, 'U of T', 'building')
+smd.addBlockPlace(7, 3, 1, 1, 'Pond', 'water')
 
 // add some line places
-smd.addLinePlace(0, 0, 8, 0, 'main street', 'street')
+smd.addLinePlace(0, 0, 8, 0, 'Main Street', 'street')
+smd.addLinePlace(3, 0, 3, 4, 'Line 1', 'transitLine')
 
-// add some nodes places
-smd.addNodePlace(3, 0, 'subway station', 'poi')
+// add some node places
+smd.addNodePlace(3, 2, 'Subway Station', 'poi')
 
 // add some control menus
-smd.addFilterBox(['park', 'building'])
+smd.addFilterByClassBox(['park', 'building'])
+smd.addFilterByNameBox()

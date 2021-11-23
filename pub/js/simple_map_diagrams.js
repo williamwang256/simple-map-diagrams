@@ -1,6 +1,6 @@
 /* Simple Map Diagrams Library.
 
-URL: https://fierce-shelf-08886.herokuapp.com/library.html
+URL: https://fierce-shelf-08886.herokuapp.com/examples.html
 */
 
 id = 0      // global id counter
@@ -8,11 +8,17 @@ id = 0      // global id counter
 function SimpleMapDiagram(width, height) {
     this.nodes = []
     this.streets = []
+
+    // lists to stores the places on the map
     this.blockPlaces = []
     this.linePlaces = []
     this.nodePlaces = []
+
+    // width and height of the map
     this.width = width
     this.height = height
+
+    // unique identifier; incremented every time a SMD is created
     this.id = id
     id++
 }
@@ -23,7 +29,7 @@ SimpleMapDiagram.prototype = {
     setUp: function(width, height, title) {
         mapSetUp(width, height, title, this.id)
         initializeNodes(width, height, this.nodes, this.id)
-        initializeInfoBox(this.id)
+        initializeControlBox(this.id)
     },
 
     /* add a connection between nodes (x1, y1) and (x2, y2) */
@@ -89,6 +95,7 @@ SimpleMapDiagram.prototype = {
 
     /* highlight all places with a given name */
     highlightAllByName: function(name) {
+        // if no options are given, default to include all
         this.blockPlaces.map((element) => {
             if (element.name === name) {
                 toggleHighlightBlockPlace(this.id + '.b.' + element.x + '.' + element.y, this.id)
@@ -96,11 +103,25 @@ SimpleMapDiagram.prototype = {
         })
     },
 
-    /* add a filter box which will give users the option to filter out certain elements */
-    addFilterBox: function(options) {
-        addFilterBox(options, this.blockPlaces, this.id)
+    /* add a filter box which will give users the option to filter by certain place type */
+    addFilterByClassBox: function(options) {
+        // if no options are given, default to include all
+        if (!options) {
+            options = getAllItemClasses(this.blockPlaces)
+        }
+        addFilterBox(options, this.blockPlaces, getAllPlacesByClass, this.id)
+    },
+
+    /* add a filter box which will give users the option to filter by certain place type */
+    addFilterByNameBox: function(options) {
+        if (!options) {
+            options = getAllItemNames(this.blockPlaces)
+        }
+        addFilterBox(options, this.blockPlaces, getPlaceByName, this.id)
     }
 }
+
+/*** Helper functions ***/
 
 /* return a list of all places of a certain class */
 function getAllPlacesByClass(type, elements, id) {
@@ -117,10 +138,33 @@ function getAllPlacesByClass(type, elements, id) {
 function getPlaceByName(name, elements, id) {
     const list = []
     elements.map((element) => {
-        if (element.name === type) {
-            return id + '.b.' + element.x + '.' + element.y
+        if (element.name === name) {
+            list.push(id + '.b.' + element.x + '.' + element.y)
         }
     })
+    return list
+}
+
+/* function to get a list of all place classes on the map */
+function getAllItemClasses(elements) {
+    const list = []
+    elements.map((element) => {
+        if (!list.includes(element.class)) {
+            list.push(element.class)
+        }
+    })
+    return list
+}
+
+/* function to get a list of all names of places on the map */
+function getAllItemNames(elements) {
+    const list = []
+    elements.map((element) => {
+        if (!list.includes(element.name)) {
+            list.push(element.name)
+        }
+    })
+    return list
 }
 
 /*** DOM manipulation functions ***/
@@ -158,6 +202,11 @@ function mapSetUp(width, height, title, id) {
     const nodePlaces = document.createElement('div')
     nodePlaces.id = id + '.nodePlacesContainer'
 
+    // create a container for the control menus
+    const controlCentre = document.createElement('div')
+    controlCentre.id = id + '.controlCentre'
+    body.append(controlCentre)
+
     // add to the main map container
     mapContainer.appendChild(nodes)
     mapContainer.appendChild(connections)
@@ -167,24 +216,26 @@ function mapSetUp(width, height, title, id) {
 }
 
 /* function to set up the info box */
-function initializeInfoBox(id) {
-    const body = $('body')
-    const infoBox = document.createElement('div')
+function initializeControlBox(id) {
+    const controlCentre = document.getElementById(id + '.controlCentre')
+    const controlBox = document.createElement('div')
     
     // title
-    const title = document.createElement('h3')
+    const title = document.createElement('h4')
     title.append(document.createTextNode('Currently selected:'))
-    infoBox.append(title)
+    controlBox.append(title)
 
     // label to display information
     const infoLabel = document.createElement('p')
-    infoBox.className = 'infoBox'
+    controlBox.className = 'controlBox'
+    controlBox.style.height = '100px'
     infoLabel.id = id + '.label'
-    infoBox.append(infoLabel)
+    infoLabel.className = 'controlLabel'
+    controlBox.append(infoLabel)
     infoLabel.append(document.createTextNode(''))
 
     // add to the document
-    body.append(infoBox)
+    controlCentre.append(controlBox)
 }
 
 /* function to set up the grid of nodes */
@@ -216,22 +267,27 @@ function initializeNodes(width, height, nodes, id) {
 function addConnection(x1, y1, x2, y2, nodes, id) {
     const connectionsContainer = document.getElementById(id + '.connectionsContainer')
     const line = document.createElement('div')
-    line.className = 'connection'
+    line.classList.add('line')
+    line.classList.add('connection')
 
     /* determine the width of the connection line */
     let width = 5;
     if (x1 !== x2) {
         width = ((x2 - x1) * 50)
-        nodes[x1][y1].element.className = 'intersection'
-        nodes[x2][y1].element.className = 'intersection'
+        nodes[x1][y1].element.classList.add('node')
+        nodes[x2][y1].element.classList.add('node')
+        nodes[x1][y1].element.classList.add('intersection')
+        nodes[x2][y1].element.classList.add('intersection')
     }
     
     /* determine the height of the connection line */
     let height = 5;
     if (y1 !== y2) {
         height = ((y2 - y1) * 50)
-        nodes[x1][y1].element.className = 'intersection'
-        nodes[x1][y2].element.className = 'intersection'
+        nodes[x1][y1].element.classList.add('node')
+        nodes[x1][y2].element.classList.add('node')
+        nodes[x1][y1].element.classList.add('intersection')
+        nodes[x1][y2].element.classList.add('intersection')
     }
 
     /* create the element */
@@ -247,7 +303,9 @@ function createBlockPlace(place, id) {
     const blockPlacesContainer = document.getElementById(id + '.blockPlacesContainer')
     const block = document.createElement('div')
     block.id = id + '.b.' + place.x + '.' + place.y
-    block.className = place.class
+    block.classList.add('block')
+    block.classList.add(place.class)
+
     block.style.width = (place.width * 50 - 5) + 'px'
     block.style.height = (place.height * 50 - 5) + 'px'
     block.style.left = (place.x * 50 + 60) + 'px'
@@ -272,7 +330,8 @@ function createLinePlace(place, id) {
     const linePlacesContainer = document.getElementById(id + '.linePlacesContainer')
     const line = document.createElement('div')
     line.id = id + '.l.' + place.x1 + '.' + place.y1 + '.' + place.x2 + '.' + place.y2
-    line.className = place.class
+    line.classList.add('line')
+    line.classList.add(place.class)
 
     // determine the width of the line
     let width = 5;
@@ -288,7 +347,7 @@ function createLinePlace(place, id) {
 
     // when the place is clicked, display its information
     line.addEventListener('click', function(e) {
-        const infoLabel = document.getElementById('label')
+        const infoLabel = document.getElementById(id + '.label')
         infoLabel.textContent = place.name
     })
 
@@ -317,7 +376,8 @@ function createNodePlace(place, id) {
     // determine placement
     node.style.left = place.x * 50 + 50 + 'px'
     node.style.top = place.y * 50 + 50 + 'px'
-    node.className = place.class
+    node.classList.add('node')
+    node.classList.add(place.class)
     
     // when the place is clicked, display its information
     node.addEventListener('click', function(e) {
@@ -344,17 +404,18 @@ function toggleHighlightBlockPlace(id) {
 }
 
 /* function to add a menu to filter places by type */
-function addFilterBox(options, places, id) {
-    const body = $('body')
+function addFilterBox(options, places, elementGetter, id) {
+    const controlCentre = document.getElementById(id + '.controlCentre')
     const filterBox = document.createElement('div')
-    filterBox.className = 'infoBox'
-    body.append(filterBox)
+    filterBox.className = 'controlBox'
+    controlCentre.append(filterBox)
     
     // add a title
     const label = document.createElement('h3')
-    label.append(document.createTextNode('Highlight by type:'))
+    label.append(document.createTextNode('Highlight:'))
     const instruction = document.createElement('p')
-    instruction.append(document.createTextNode('Click on a place type to highlight on the map.'))
+    instruction.className = 'controlLabel'
+    instruction.append(document.createTextNode('Click to highlight on the map.'))
     filterBox.append(label)
     filterBox.append(instruction)
 
@@ -364,9 +425,22 @@ function addFilterBox(options, places, id) {
     
     options.map((element) => {
         const item = document.createElement('li')
-        item.append(document.createTextNode(element))
+        
+        // add a check box
+        const checkBox = document.createElement('input')
+        checkBox.id = id + '.fb.' + element
+        checkBox.type = 'checkbox'
+
+        // add a label
+        const label = document.createElement('label')
+        label.append(document.createTextNode(element))
+        label.htmlFor = checkBox.id
+        label.className = 'controlLabel'
+        item.append(checkBox)
+        item.append(label)
+        
         list.append(item)
-        const elements = getAllPlacesByClass(element, places, id)
+        const elements = elementGetter(element, places, id)
 
         // when a place name is clicked, highlight it on the map
         item.addEventListener('click', function(e) {

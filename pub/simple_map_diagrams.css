@@ -1,40 +1,78 @@
 
-html {
-    height: 100%;
-  }
-  
 body {
     background-color: white;
     margin: 40px;
+    font-family: "Helvetica Neue", Helvetica, sans-serif;
 }
 
 ul li {
     list-style: none;
 }
 
-.poi {
+/* lines css */
+
+.line {
+    position: absolute;
+    z-index: 1;
+}
+
+.connection {
+    background-color: #888888;
+}
+
+.street {
+    background-color: black;
+}
+
+.transitLine {
+    background-color: gold;
+}
+
+/* blocks css */
+
+.block {
+    position: absolute;
+}
+
+.park {
+    background-color: lightgreen;
+}
+
+.building {
+    background-color: darkgray;
+}
+
+.water {
+    background-color: lightskyblue;
+}
+
+/* nodes css */
+
+.node {
     width: 10px; 
     height: 10px; 
     border-radius: 50%; 
-    border: 3px solid black;
     position: absolute;
-    background-color: white;
     z-index: 2;
 }
 
-.poi:hover {
-    box-shadow: 0 0 10px #888888;
+.poi {
+    border: 3px solid black;
+    background-color: white;
 }
 
 .intersection {
-    width: 10px; 
-    height: 10px; 
-    border-radius: 50%; 
     border: 3px solid darkgray;
-    position: absolute;
     background-color: grey;
-    z-index: 2;
 }
+
+/* shadow on mouseover for all added places*/
+.poi:hover, .street:hover, .park:hover, 
+.building:hover, .water:hover, .transitLine:hover {
+    box-shadow: 0 0 10px #888888;
+}
+
+/* containers css */
 
 .mapContainer {
     position: relative;
@@ -44,50 +82,19 @@ ul li {
     background-color: rgb(229, 234, 240);
 }
 
-.infoBox {
+.controlBox {
     border: 3px solid lightgrey;
     position: relative;
-    width: 500px;
+    width: 300px;
     height: auto;
     padding: 20px;
     float:left
 }
 
-.connection {
-    position: absolute;
-    background-color: grey;
-}
-
-.street {
-    position: absolute;
-    background-color: gold;
-    z-index: 1;
-}
-
-.street:hover {
-    box-shadow: 0 0 10px #888888;
-}
-
-.park {
-    background-color: lightgreen;
-    position: absolute;
-}
-
-.park:hover {
-    box-shadow: 0 0 10px #888888;
-}
-
-.building {
-    background-color: darkgray;
-    position: absolute;
-}
+/* misc. css */
 
 .highlight {
     box-shadow: 0 0 20px red;
-}
-
-.building:hover {
-    box-shadow: 0 0 20px #888888;
 }
 
 .placeLabel {
@@ -98,11 +105,9 @@ ul li {
     padding: 5px;
 }
 
-.water {
-    background-color: lightskyblue;
-    position: absolute;
-}
-
-.water:hover {
-    box-shadow: 0 0 20px #888888;
+.controlLabel {
+    font-size: 12px;
+    margin: 5px;
+    color: grey;
+    padding: 5px;
 }

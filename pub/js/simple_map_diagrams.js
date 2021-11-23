@@ -1,4 +1,7 @@
-/* Simple Map Diagrams Library. */
+/* Simple Map Diagrams Library.
+
+URL: https://fierce-shelf-08886.herokuapp.com/library.html
+*/
 
 id = 0      // global id counter
 

@@ -1,0 +1,108 @@
+
+html {
+    height: 100%;
+  }
+  
+body {
+    background-color: white;
+    margin: 40px;
+}
+
+ul li {
+    list-style: none;
+}
+
+.poi {
+    width: 10px; 
+    height: 10px; 
+    border-radius: 50%; 
+    border: 3px solid black;
+    position: absolute;
+    background-color: white;
+    z-index: 2;
+}
+
+.poi:hover {
+    box-shadow: 0 0 10px #888888;
+}
+
+.intersection {
+    width: 10px; 
+    height: 10px; 
+    border-radius: 50%; 
+    border: 3px solid darkgray;
+    position: absolute;
+    background-color: grey;
+    z-index: 2;
+}
+
+.mapContainer {
+    position: relative;
+    border: 3px solid lightgrey;
+    padding: 5px;
+    float:left;
+    background-color: rgb(229, 234, 240);
+}
+
+.infoBox {
+    border: 3px solid lightgrey;
+    position: relative;
+    width: 500px;
+    height: auto;
+    padding: 20px;
+    float:left
+}
+
+.connection {
+    position: absolute;
+    background-color: grey;
+}
+
+.street {
+    position: absolute;
+    background-color: gold;
+    z-index: 1;
+}
+
+.street:hover {
+    box-shadow: 0 0 10px #888888;
+}
+
+.park {
+    background-color: lightgreen;
+    position: absolute;
+}
+
+.park:hover {
+    box-shadow: 0 0 10px #888888;
+}
+
+.building {
+    background-color: darkgray;
+    position: absolute;
+}
+
+.highlight {
+    box-shadow: 0 0 20px red;
+}
+
+.building:hover {
+    box-shadow: 0 0 20px #888888;
+}
+
+.placeLabel {
+    position: absolute;
+    font-size: 10px;
+    margin: 5px;
+    color: #333333;
+    padding: 5px;
+}
+
+.water {
+    background-color: lightskyblue;
+    position: absolute;
+}
+
+.water:hover {
+    box-shadow: 0 0 20px #888888;
+}

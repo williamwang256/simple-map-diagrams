@@ -21,9 +21,9 @@ smd.addMultipleConnections([
 ])
 
 // add some block places
-smd.addBlockPlace(4, 2, 1, 2, 'Central Park', 'park')
+smd.addBlockPlace(4, 2, 1, 2, 'Queen\'s Park', 'park', 'Queen\'s Park is an urban park in Downtown Toronto, Ontario, Canada. Opened in 1860 by Edward, Prince of Wales, it was named in honour of Queen Victoria. The park is the site of the Ontario Legislative Building, which houses the Legislative Assembly of Ontario. Source: Wikipedia.')
 smd.addBlockPlace(0, 1, 1, 1, 'North Park', 'park')
-smd.addBlockPlace(3, 3, 1, 1, 'U of T', 'building')
+smd.addBlockPlace(3, 3, 1, 1, 'U of T', 'building', 'The University of Toronto is a public research university in Toronto, Ontario, Canada, located on the grounds that surround Queen\'s Park. It was founded by royal charter in 1827 as King\'s College, the first institution of higher learning in Upper Canada. Source: Wikipedia.')
 smd.addBlockPlace(7, 3, 1, 1, 'Pond', 'water')
 
 // add some line places

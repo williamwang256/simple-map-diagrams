@@ -30,6 +30,7 @@ SimpleMapDiagram.prototype = {
         mapSetUp(width, height, title, this.id)
         initializeNodes(width, height, this.nodes, this.id)
         initializeControlBox(this.id)
+        console.log(this.nodes)
     },
 
     /* add a connection between nodes (x1, y1) and (x2, y2) */
@@ -45,40 +46,43 @@ SimpleMapDiagram.prototype = {
     },
 
     /* add a block place to the map. note: type must match one of the pre-defined types */
-    addBlockPlace: function(x, y, width, height, name, type) {
+    addBlockPlace: function(x, y, width, height, name, type, description) {
         const placeObj = {
             x: x,
             y: y,
             width: width,
             height: height,
             name: name,
-            class: type
+            class: type,
+            description: description
         }
         createBlockPlace(placeObj, this.id)
         this.blockPlaces.push(placeObj)
     },
 
     /* add a line place to the map. note: type must match one of the pre-defined types */
-    addLinePlace: function(x1, y1, x2, y2, name, type) {
+    addLinePlace: function(x1, y1, x2, y2, name, type, description) {
         const placeObj = {
             x1: x1,
             y1: y1,
             x2: x2,
             y2: y2,
             name: name,
-            class: type
+            class: type,
+            description: description
         }
         createLinePlace(placeObj, this.id)
         this.linePlaces.push(placeObj)
     },
 
     /* add a node place to the map. note: type must match one of the pre-defined types */
-    addNodePlace: function(x, y, name, type) {
+    addNodePlace: function(x, y, name, type, description) {
         const placeObj = {
             x: x,
             y: y,
             name: name,
-            class: type
+            class: type,
+            description: description
         }
         createNodePlace(placeObj, this.id)
         this.nodePlaces.push(placeObj)
@@ -224,14 +228,18 @@ function initializeControlBox(id) {
     const title = document.createElement('h4')
     title.append(document.createTextNode('Currently selected:'))
     controlBox.append(title)
-
-    // label to display information
-    const infoLabel = document.createElement('p')
     controlBox.className = 'controlBox'
-    controlBox.style.height = '100px'
-    infoLabel.id = id + '.label'
+
+    // labels to display information
+    const infoLabel = document.createElement('p')
+    infoLabel.id = id + '.selectedLabel'
     infoLabel.className = 'controlLabel'
+    const descriptionLabel = document.createElement('p')
+    descriptionLabel.id = id + '.descLabel'
+    descriptionLabel.className = 'controlLabel'
+
     controlBox.append(infoLabel)
+    controlBox.append(descriptionLabel)
     infoLabel.append(document.createTextNode(''))
 
     // add to the document
@@ -253,8 +261,8 @@ function initializeNodes(width, height, nodes, id) {
             node.style.top = j * 50 + 50 + 'px'
             node.id = id + '.n.' + i + '.' + j
             nodes[i][j] = {
-                description: "",
-                element: node
+                description: '',
+                id: node.id
             }
             item.appendChild(node)
             column.appendChild(item)
@@ -274,20 +282,20 @@ function addConnection(x1, y1, x2, y2, nodes, id) {
     let width = 5;
     if (x1 !== x2) {
         width = ((x2 - x1) * 50)
-        nodes[x1][y1].element.classList.add('node')
-        nodes[x2][y1].element.classList.add('node')
-        nodes[x1][y1].element.classList.add('intersection')
-        nodes[x2][y1].element.classList.add('intersection')
+        document.getElementById(nodes[x1][y1].id).classList.add('node')
+        document.getElementById(nodes[x2][y1].id).classList.add('node')
+        document.getElementById(nodes[x1][y1].id).classList.add('intersection')
+        document.getElementById(nodes[x2][y1].id).classList.add('intersection')
     }
     
     /* determine the height of the connection line */
     let height = 5;
     if (y1 !== y2) {
         height = ((y2 - y1) * 50)
-        nodes[x1][y1].element.classList.add('node')
-        nodes[x1][y2].element.classList.add('node')
-        nodes[x1][y1].element.classList.add('intersection')
-        nodes[x1][y2].element.classList.add('intersection')
+        document.getElementById(nodes[x1][y1].id).classList.add('node')
+        document.getElementById(nodes[x1][y2].id).classList.add('node')
+        document.getElementById(nodes[x1][y1].id).classList.add('intersection')
+        document.getElementById(nodes[x1][y2].id).classList.add('intersection')
     }
 
     /* create the element */
@@ -314,8 +322,10 @@ function createBlockPlace(place, id) {
 
     // when the place is clicked, display its information
     block.addEventListener('click', function(e) {
-        const infoLabel = document.getElementById(id + '.label')
+        const infoLabel = document.getElementById(id + '.selectedLabel')
+        const descriptionLabel = document.getElementById(id + '.descLabel')
         infoLabel.textContent = place.name
+        descriptionLabel.textContent = place.description
     })
 
     // add a label
@@ -347,8 +357,10 @@ function createLinePlace(place, id) {
 
     // when the place is clicked, display its information
     line.addEventListener('click', function(e) {
-        const infoLabel = document.getElementById(id + '.label')
+        const infoLabel = document.getElementById(id + '.selectedLabel')
+        const descriptionLabel = document.getElementById(id + '.descLabel')
         infoLabel.textContent = place.name
+        descriptionLabel.textContent = place.description
     })
 
     // create the element
@@ -381,8 +393,10 @@ function createNodePlace(place, id) {
     
     // when the place is clicked, display its information
     node.addEventListener('click', function(e) {
-        const infoLabel = document.getElementById(id + '.label')
+        const infoLabel = document.getElementById(id + '.selectedLabel')
+        const descriptionLabel = document.getElementById(id + '.descLabel')
         infoLabel.textContent = place.name
+        descriptionLabel.textContent = place.description
     })
 
     // add a label

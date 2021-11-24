@@ -26,8 +26,8 @@ function SimpleMapDiagram(width, height) {
 SimpleMapDiagram.prototype = {
 
     /* set up all the nodes on the grid */
-    setUp: function(width, height, title) {
-        mapSetUp(width, height, title, this.id)
+    setUp: function(width, height, title, description) {
+        mapSetUp(width, height, title, description, this.id)
         initializeNodes(width, height, this.nodes, this.id)
         initializeControlBox(this.id)
     },
@@ -208,7 +208,7 @@ function getAllItemNames(elements) {
 /*** DOM manipulation functions ***/
 
 /* function to set up the map */
-function mapSetUp(width, height, title, id) {
+function mapSetUp(width, height, title, description, id) {
     const body = $('body')
 
     // create a container for this Simple Map Diagram
@@ -225,14 +225,11 @@ function mapSetUp(width, height, title, id) {
 
     // create a title and subtitle
     const titleContainer = document.createElement('div')
-
     const titleElement = document.createElement('h3')
     titleElement.append(document.createTextNode(title))
-
     const subtitle = document.createElement('p')
     subtitle.className = 'controlLabel'
-    subtitle.append(document.createTextNode('This is a sample use case demonstrating a use case of the Simple Map Diagrams library, showing a campus map.'))
-
+    subtitle.append(document.createTextNode(description))
     titleContainer.id = id + '.titleContainer'
     titleContainer.className = 'titleContainer'
     titleContainer.append(titleElement)

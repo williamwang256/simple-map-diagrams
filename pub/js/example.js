@@ -38,7 +38,7 @@ smd.addLinePlace(3, 0, 3, 4, 'Subway Line 1', 'transitLine', 'Line 1 of the city
 // add some node places
 smd.addNodePlace(3, 2, 'University Station', 'poi', 'University subway station, right by campus. Access subway line 1 and bus route 2. No disruptions ongoing.')
 smd.addNodePlace(3, 4, 'Downtown Station', 'poi', 'Downtown subway station. Access subway line 1 and bus route 3. No disruptions ongoing.')
-smd.addNodePlace(1, 1, 'Special Event!', 'specialEvent', 'Club fair happening here today 3-4pm.')
+smd.addNodePlace(1, 1, 'Special Event', 'specialEvent', 'Club fair happening here today 3-4pm.')
 smd.addNodePlace(6, 4, 'Road closure', 'incident', 'Construction ongoing. Please avoid the area.')
 
 // add some control menus

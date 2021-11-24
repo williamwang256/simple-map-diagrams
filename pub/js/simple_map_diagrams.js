@@ -46,52 +46,30 @@ SimpleMapDiagram.prototype = {
 
     /* add a block place to the map. note: type must match one of the pre-defined types */
     addBlockPlace: function(x, y, width, height, name, type, description) {
-        const placeObj = {
-            x: x,
-            y: y,
-            width: width,
-            height: height,
-            name: name,
-            class: type,
-            description: description
-        }
-        createBlockPlace(placeObj, this.id)
-        this.blockPlaces.push(placeObj)
+        const blockPlace = new BlockPlace(x, y, width, height, name, type, description)
+        createBlockPlace(blockPlace, this.id)
+        this.blockPlaces.push(blockPlace)
     },
 
     /* add a line place to the map. note: type must match one of the pre-defined types */
     addLinePlace: function(x1, y1, x2, y2, name, type, description) {
-        const placeObj = {
-            x1: x1,
-            y1: y1,
-            x2: x2,
-            y2: y2,
-            name: name,
-            class: type,
-            description: description
-        }
-        createLinePlace(placeObj, this.id)
-        this.linePlaces.push(placeObj)
+        const linePlace = new LinePlace(x1, y1, x2, y2, name, type, description)
+        createLinePlace(linePlace, this.id)
+        this.linePlaces.push(linePlace)
     },
 
     /* add a node place to the map. note: type must match one of the pre-defined types */
     addNodePlace: function(x, y, name, type, description) {
-        const placeObj = {
-            x: x,
-            y: y,
-            name: name,
-            class: type,
-            description: description
-        }
-        createNodePlace(placeObj, this.id)
-        this.nodePlaces.push(placeObj)
+        const nodePlace = new NodePlace(x, y, name, type, description)
+        createNodePlace(nodePlace, this.id)
+        this.nodePlaces.push(nodePlace)
     },
 
     /* highlight all places of a given type */
     highlightAllByType: function(type) {
         this.blockPlaces.map((element) => {
             if (element.class === type) {
-                toggleHighlightBlockPlace(this.id + '.b.' + element.x + '.' + element.y, this.id)
+                toggleHighlightBlockPlace(element.getID(this.id), this.id)
             }
         })
     },
@@ -101,26 +79,83 @@ SimpleMapDiagram.prototype = {
         // if no options are given, default to include all
         this.blockPlaces.map((element) => {
             if (element.name === name) {
-                toggleHighlightBlockPlace(this.id + '.b.' + element.x + '.' + element.y, this.id)
+                toggleHighlightBlockPlace(element.getID(this.id), this.id)
             }
         })
     },
 
     /* add a filter box which will give users the option to filter by certain place type */
     addFilterByClassBox: function(title, description, options) {
+        const all_places = this.blockPlaces.concat(this.linePlaces).concat(this.nodePlaces)
         // if no options are given, default to include all
         if (!options) {
-            options = getAllItemClasses(this.blockPlaces)
+            options = getAllItemClasses(all_places)
         }
-        addFilterBox(options, title, description, this.blockPlaces, getAllPlacesByClass, this.id)
+        addFilterBox(options, title, description, all_places, getAllPlacesByClass, this.id)
     },
 
     /* add a filter box which will give users the option to filter by certain place type */
     addFilterByNameBox: function(title, description, options) {
+        const all_places = this.blockPlaces.concat(this.linePlaces).concat(this.nodePlaces)
+        // if no options are given, default to include all
         if (!options) {
-            options = getAllItemNames(this.blockPlaces)
+            options = getAllItemNames(all_places)
         }
-        addFilterBox(options, title, description, this.blockPlaces, getPlaceByName, this.id)
+        addFilterBox(options, title, description, all_places, getPlaceByName, this.id)
+    }
+}
+
+/*** Classes for place objects ***/
+
+/* block place class */
+class BlockPlace {
+	constructor(x, y, width, height, name, type, description) {
+		this.x = x
+		this.y = y
+		this.width = width
+		this.height = height
+        this.name = name
+        this.class = type
+        this.description = description
+	}
+
+    /* get the id of this place, given its SMD id*/
+	getID(id) {
+        return id + '.b.' + this.x + '.' + this.y
+    }
+}
+
+/* line place class */
+class LinePlace {
+	constructor(x1, y1, x2, y2, name, type, description) {
+		this.x1 = x1
+		this.y1 = y1
+        this.x2 = x2
+		this.y2 = y2
+        this.name = name
+        this.class = type
+        this.description = description
+	}
+
+    /* get the id of this place, given its SMD id*/
+	getID(id) {
+        return id + '.l.' + this.x1 + '.' + this.y1 + '.' + this.x2 + '.' + this.y2
+    }
+}
+
+/* node place class */
+class NodePlace {
+	constructor(x, y, name, type, description) {
+		this.x = x
+		this.y = y
+        this.name = name
+        this.class = type
+        this.description = description
+	}
+
+    /* get the id of this place, given its SMD id*/
+	getID(id) {
+        return id + '.n.' + this.x + '.' + this.y
     }
 }
 
@@ -131,7 +166,7 @@ function getAllPlacesByClass(type, elements, id) {
     const list = []
     elements.map((element) => {
         if (element.class === type) {
-            list.push(id + '.b.' + element.x + '.' + element.y)
+            list.push(element.getID(id))
         }
     })
     return list
@@ -142,7 +177,7 @@ function getPlaceByName(name, elements, id) {
     const list = []
     elements.map((element) => {
         if (element.name === name) {
-            list.push(id + '.b.' + element.x + '.' + element.y)
+            list.push(element.getID(id))
         }
     })
     return list
@@ -271,7 +306,7 @@ function initializeNodes(width, height, nodes, id) {
             const item = document.createElement('li')
             node.style.left = i * 50 + 50 + 'px'
             node.style.top = j * 50 + 50 + 'px'
-            node.id = id + '.n.' + i + '.' + j
+            node.id = id + '.sn.' + i + '.' + j
             nodes[i][j] = {
                 description: '',
                 id: node.id
@@ -319,22 +354,21 @@ function addConnection(x1, y1, x2, y2, nodes, id) {
 }
 
 /* function to add a block place to the map (i.e., a place that fits between streets) */
-function createBlockPlace(place, id) {
+function createBlockPlace(blockPlace, id) {
     const blockPlacesContainer = document.getElementById(id + '.blockPlacesContainer')
     const block = document.createElement('div')
-    block.id = id + '.b.' + place.x + '.' + place.y
+    block.id = blockPlace.getID(id)
     block.classList.add('block')
-    block.classList.add(place.class)
-
-    block.style.width = (place.width * 50 - 5) + 'px'
-    block.style.height = (place.height * 50 - 5) + 'px'
-    block.style.left = (place.x * 50 + 60) + 'px'
-    block.style.top = (place.y * 50 + 60) + 'px'
+    block.classList.add(blockPlace.class)
+    block.style.width = (blockPlace.width * 50 - 5) + 'px'
+    block.style.height = (blockPlace.height * 50 - 5) + 'px'
+    block.style.left = (blockPlace.x * 50 + 60) + 'px'
+    block.style.top = (blockPlace.y * 50 + 60) + 'px'
     blockPlacesContainer.append(block)
 
     // add a label
     const label = document.createElement('label')
-    label.appendChild(document.createTextNode(place.name))
+    label.appendChild(document.createTextNode(blockPlace.name))
     label.className = 'placeLabel'
     block.append(label)
 
@@ -342,41 +376,41 @@ function createBlockPlace(place, id) {
     block.addEventListener('click', function(e) {
         const infoLabel = document.getElementById(id + '.selectedLabel')
         const descriptionLabel = document.getElementById(id + '.descLabel')
-        infoLabel.textContent = place.name
-        descriptionLabel.textContent = place.description
+        infoLabel.textContent = blockPlace.name
+        descriptionLabel.textContent = blockPlace.description
     })
 }
 
 /* function to add a line place to the map (i.e., a place that fits on a connection) */
-function createLinePlace(place, id) {
+function createLinePlace(linePlace, id) {
     const linePlacesContainer = document.getElementById(id + '.linePlacesContainer')
     const line = document.createElement('div')
-    line.id = id + '.l.' + place.x1 + '.' + place.y1 + '.' + place.x2 + '.' + place.y2
+    line.id = linePlace.getID(id)
     line.classList.add('line')
-    line.classList.add(place.class)
+    line.classList.add(linePlace.class)
 
     // determine the width of the line
     let width = 5;
-    if (place.x1 !== place.x2) {
-        width = ((place.x2 - place.x1) * 50)
+    if (linePlace.x1 !== linePlace.x2) {
+        width = ((linePlace.x2 - linePlace.x1) * 50)
     }
     
     // determine the height of the line
     let height = 5;
-    if (place.y1 !== place.y2) {
-        height = ((place.y2 - place.y1) * 50)
+    if (linePlace.y1 !== linePlace.y2) {
+        height = ((linePlace.y2 - linePlace.y1) * 50)
     }
 
     // create the element
     line.style.width = width + 'px'
     line.style.height = height + 'px'
-    line.style.left = (50 * (place.x1 + 1) + 5) + 'px'
-    line.style.top = (50 * (place.y1 + 1) + 5) + 'px'
+    line.style.left = (50 * (linePlace.x1 + 1) + 5) + 'px'
+    line.style.top = (50 * (linePlace.y1 + 1) + 5) + 'px'
     
 
     // add a label
     const label = document.createElement('label')
-    label.appendChild(document.createTextNode(place.name))
+    label.appendChild(document.createTextNode(linePlace.name))
     label.className = ('placeLabel')
     line.append(label)
     linePlacesContainer.append(line)
@@ -385,27 +419,27 @@ function createLinePlace(place, id) {
     line.addEventListener('click', function(e) {
         const infoLabel = document.getElementById(id + '.selectedLabel')
         const descriptionLabel = document.getElementById(id + '.descLabel')
-        infoLabel.textContent = place.name
+        infoLabel.textContent = linePlace.name
         descriptionLabel.textContent = place.description
     })
 }
 
 /* function to add a node place to the map (i.e., a place that falls on a node) */
-function createNodePlace(place, id) {
+function createNodePlace(nodePlace, id) {
     const nodePlacesContainer = document.getElementById(id + '.nodePlacesContainer')
     const node = document.createElement('div')
-    node.id = id + '.n.' + place.x + '.' + place.y
-    node.className = place.class
+    node.id = nodePlace.getID(id)
+    node.className = nodePlace.class
 
     // determine placement
-    node.style.left = place.x * 50 + 50 + 'px'
-    node.style.top = place.y * 50 + 50 + 'px'
+    node.style.left = nodePlace.x * 50 + 50 + 'px'
+    node.style.top = nodePlace.y * 50 + 50 + 'px'
     node.classList.add('node')
-    node.classList.add(place.class)
+    node.classList.add(nodePlace.class)
     
     // add a label
     const label = document.createElement('label')
-    label.appendChild(document.createTextNode(place.name))
+    label.appendChild(document.createTextNode(nodePlace.name))
     label.className = 'placeLabel'
     node.append(label)
     nodePlacesContainer.append(node)
@@ -414,8 +448,8 @@ function createNodePlace(place, id) {
     node.addEventListener('click', function(e) {
         const infoLabel = document.getElementById(id + '.selectedLabel')
         const descriptionLabel = document.getElementById(id + '.descLabel')
-        infoLabel.textContent = place.name
-        descriptionLabel.textContent = place.description
+        infoLabel.textContent = nodePlace.name
+        descriptionLabel.textContent = nodePlace.description
     })
 }
 

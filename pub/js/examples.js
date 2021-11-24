@@ -4,7 +4,7 @@
 
 // initialization
 const smd = new SimpleMapDiagram()
-smd.setUp(10, 5, 'Campus Map', 'This is a sample use case of the Simple Map Diagrams library, demonstrating a campus map.')
+smd.setUp(10, 5, 'Main Campus Map', 'This is a sample use case of the Simple Map Diagrams library, demonstrating a campus map.')
 
 // add some connections
 smd.addMultipleConnections([
@@ -19,7 +19,6 @@ smd.addMultipleConnections([
     [4, 0, 4, 4],
     [0, 2, 8, 2]
 ])
-
 
 // add some block places
 smd.addBlockPlace(4, 2, 1, 2, 'Central Park', 'park', 'The main park on campus. ')
@@ -44,3 +43,26 @@ smd.addNodePlace(6, 4, 'Road closure', 'incident', 'Construction ongoing. Please
 // add some control menus
 smd.addFilterByClassBox('Filter items by type:', 'These options provides users of the website to highlight items on the map by a certain type.', ['park', 'building'])
 smd.addFilterByNameBox('View items by name:', 'These options provides users of the website to highlight a certain item on the map.')
+
+
+// create another instance of the library to represent a secondary campus map
+
+// initialization
+const smd1 = new SimpleMapDiagram()
+smd1.setUp(4, 3, 'Secondary Campus Map', 'This is a demonstration of creating multiple instances of the Simple Map Diagrams library.')
+
+// add some connections
+smd1.addMultipleConnections([
+    [0, 0, 3, 0],
+    [0, 0, 0, 2],
+    [0, 2, 3, 2],
+    [3, 0, 3, 2],
+    [1, 1, 3, 1],
+    [1, 0, 1, 2]
+])
+
+// add some places and menus
+smd1.addBlockPlace(0, 0, 1, 1, 'Campus Park', 'park', 'Small park on the secondary campus')
+smd1.addBlockPlace(1, 1, 1, 1, 'Main Building', 'building', 'Main building of the secondary campus')
+smd1.addLinePlace(0, 2, 3, 2, 'South street', 'street', 'Main street south of campus')
+smd1.addFilterByNameBox('View items by name:', 'These options provides users of the website to highlight a certain item on the map.')

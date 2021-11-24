@@ -4,7 +4,7 @@
 
 // initialization
 const smd = new SimpleMapDiagram()
-smd.setUp(10, 5, 'Campus Map', 'This is a sample use case demonstrating a use case of the Simple Map Diagrams library, showing a campus map.')
+smd.setUp(10, 5, 'Campus Map', 'This is a sample use case of the Simple Map Diagrams library, demonstrating a campus map.')
 
 // add some connections
 smd.addMultipleConnections([

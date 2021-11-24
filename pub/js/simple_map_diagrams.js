@@ -417,7 +417,7 @@ function createLinePlace(linePlace, id) {
         const infoLabel = document.getElementById(id + '.selectedLabel')
         const descriptionLabel = document.getElementById(id + '.descLabel')
         infoLabel.textContent = linePlace.name
-        descriptionLabel.textContent = place.description
+        descriptionLabel.textContent = linePlace.description
     })
 }
 

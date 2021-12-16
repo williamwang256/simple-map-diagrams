@@ -123,8 +123,13 @@ ul li {
     box-shadow: 0 0 20px red;
 }
 
+.hoverOver {
+    font-weight: bold;
+}
+
 .placeLabel {
     position: absolute;
+    width:  50px;
     font-size: 10px;
     margin: 5px;
     color: #333333;

@@ -14,6 +14,8 @@ function SimpleMapDiagram(width, height) {
     this.linePlaces = []
     this.nodePlaces = []
 
+    this.labelSpots = []
+
     // width and height of the map
     this.width = width
     this.height = height
@@ -47,21 +49,21 @@ SimpleMapDiagram.prototype = {
     /* add a block place to the map. note: type must match one of the pre-defined types */
     addBlockPlace: function(x, y, width, height, name, type, description) {
         const blockPlace = new BlockPlace(x, y, width, height, name, type, description)
-        createBlockPlace(blockPlace, this.id)
+        createBlockPlace(blockPlace, this.id, this.labelSpots)
         this.blockPlaces.push(blockPlace)
     },
 
     /* add a line place to the map. note: type must match one of the pre-defined types */
     addLinePlace: function(x1, y1, x2, y2, name, type, description) {
         const linePlace = new LinePlace(x1, y1, x2, y2, name, type, description)
-        createLinePlace(linePlace, this.id)
+        createLinePlace(linePlace, this.id, this.labelSpots)
         this.linePlaces.push(linePlace)
     },
 
     /* add a node place to the map. note: type must match one of the pre-defined types */
     addNodePlace: function(x, y, name, type, description) {
         const nodePlace = new NodePlace(x, y, name, type, description)
-        createNodePlace(nodePlace, this.id)
+        createNodePlace(nodePlace, this.id, this.labelSpots)
         this.nodePlaces.push(nodePlace)
     },
 
@@ -117,7 +119,7 @@ class BlockPlace {
         this.name = name
         this.class = type
         this.description = description
-	}
+    }
 
     /* get the id of this place, given its SMD id*/
 	getID(id) {
@@ -351,7 +353,7 @@ function addConnection(x1, y1, x2, y2, nodes, id) {
 }
 
 /* function to add a block place to the map (i.e., a place that fits between streets) */
-function createBlockPlace(blockPlace, id) {
+function createBlockPlace(blockPlace, id, labelSpots) {
     const blockPlacesContainer = document.getElementById(id + '.blockPlacesContainer')
     const block = document.createElement('div')
     block.id = blockPlace.getID(id)
@@ -369,6 +371,21 @@ function createBlockPlace(blockPlace, id) {
     label.className = 'placeLabel'
     block.append(label)
 
+    // look for free place to put the label
+    let tmp_x = blockPlace.x
+    let tmp_y = blockPlace.y
+    while (labelSpots.includes(tmp_x + '.' + tmp_y) && tmp_y <= blockPlace.height) {
+        if (tmp_x - blockPlace.x >= blockPlace.width) {
+            tmp_y++
+            tmp_x = blockPlace.x
+        } else {
+            tmp_x++
+        }
+    }
+    labelSpots.push(tmp_x + '.' + tmp_y)
+    label.style.left = tmp_x * 50 + 'px'
+    label.style.top = tmp_y * 50 + 'px'
+
     // when the place is clicked, display its information
     block.addEventListener('click', function(e) {
         const infoLabel = document.getElementById(id + '.selectedLabel')
@@ -376,10 +393,19 @@ function createBlockPlace(blockPlace, id) {
         infoLabel.textContent = blockPlace.name
         descriptionLabel.textContent = blockPlace.description
     })
+
+    // when the place is hover over-ed, make the text bold
+    const element = document.getElementById(blockPlace.getID(id))
+    block.addEventListener('mouseover', function(e) {
+        element.classList.add('hoverOver')
+    })
+    block.addEventListener('mouseleave', function(e) {
+        element.classList.remove('hoverOver')
+    })
 }
 
 /* function to add a line place to the map (i.e., a place that fits on a connection) */
-function createLinePlace(linePlace, id) {
+function createLinePlace(linePlace, id, labelSpots) {
     const linePlacesContainer = document.getElementById(id + '.linePlacesContainer')
     const line = document.createElement('div')
     line.id = linePlace.getID(id)
@@ -403,15 +429,40 @@ function createLinePlace(linePlace, id) {
     line.style.height = height + 'px'
     line.style.left = (50 * (linePlace.x1 + 1) + 5) + 'px'
     line.style.top = (50 * (linePlace.y1 + 1) + 5) + 'px'
-    
+    linePlacesContainer.append(line)
 
     // add a label
     const label = document.createElement('label')
     label.appendChild(document.createTextNode(linePlace.name))
     label.className = ('placeLabel')
     line.append(label)
-    linePlacesContainer.append(line)
 
+    // look for free place to put the label
+    let tmp_x = linePlace.x1
+    let tmp_y = linePlace.y1
+        if (!labelSpots.includes(tmp_x + '.' + tmp_y)) {
+        // nothing to do here
+    } else if (!labelSpots.includes((tmp_x - 1) + '.' - tmp_y)) {
+        tmp_x--
+    } else if (!labelSpots.includes(tmp_x + '.' + (tmp_y + 1))) {
+        tmp_y--
+    } else if (!labelSpots.includes((tmp_x - 1) + '.' + (tmp_y - 1))) {
+        tmp_x--
+        tmp_y--
+    } else {
+        while (labelSpots.includes(tmp_x + '.' + tmp_y) && tmp_y <= (linePlace.y2 - linePlace.y1)) {
+            if (tmp_x - linePlace.x1 >= linePlace.x2 - linePlace.x1) {
+                tmp_y++
+                tmp_x = linePlace.x1
+            } else {
+                tmp_x++
+            }
+        }
+    }
+    labelSpots.push(tmp_x + '.' + tmp_y)
+    label.style.left = tmp_x * 50 + 'px'
+    label.style.top = tmp_y * 50 + 'px'
+    
     // when the place is clicked, display its information
     line.addEventListener('click', function(e) {
         const infoLabel = document.getElementById(id + '.selectedLabel')
@@ -419,10 +470,19 @@ function createLinePlace(linePlace, id) {
         infoLabel.textContent = linePlace.name
         descriptionLabel.textContent = linePlace.description
     })
+
+    // when the place is hover over-ed, make the text bold
+    const element = document.getElementById(linePlace.getID(id))
+    line.addEventListener('mouseover', function(e) {
+        element.classList.add('hoverOver')
+    })
+    line.addEventListener('mouseleave', function(e) {
+        element.classList.remove('hoverOver')
+    })
 }
 
 /* function to add a node place to the map (i.e., a place that falls on a node) */
-function createNodePlace(nodePlace, id) {
+function createNodePlace(nodePlace, id, labelSpots) {
     const nodePlacesContainer = document.getElementById(id + '.nodePlacesContainer')
     const node = document.createElement('div')
     node.id = nodePlace.getID(id)
@@ -433,13 +493,30 @@ function createNodePlace(nodePlace, id) {
     node.style.top = nodePlace.y * 50 + 50 + 'px'
     node.classList.add('node')
     node.classList.add(nodePlace.class)
+    nodePlacesContainer.append(node)
     
     // add a label
     const label = document.createElement('label')
     label.appendChild(document.createTextNode(nodePlace.name))
     label.className = 'placeLabel'
     node.append(label)
-    nodePlacesContainer.append(node)
+
+    // look for free place to put the label
+    let tmp_x = nodePlace.x
+    let tmp_y = nodePlace.y
+    if (!labelSpots.includes(tmp_x + '.' + tmp_y)) {
+        // nothing to do here
+    } else if (!labelSpots.includes((tmp_x - 1) + '.' - tmp_y)) {
+        tmp_x--
+    } else if (!labelSpots.includes(tmp_x + '.' + (tmp_y + 1))) {
+        tmp_y--
+    } else if (!labelSpots.includes((tmp_x - 1) + '.' + (tmp_y - 1))) {
+        tmp_x--
+        tmp_y--
+    }
+    labelSpots.push(tmp_x + '.' + tmp_y)
+    label.style.left = tmp_x * 50 + 'px'
+    label.style.top = tmp_y * 50 + 'px'
 
     // when the place is clicked, display its information
     node.addEventListener('click', function(e) {
@@ -447,6 +524,15 @@ function createNodePlace(nodePlace, id) {
         const descriptionLabel = document.getElementById(id + '.descLabel')
         infoLabel.textContent = nodePlace.name
         descriptionLabel.textContent = nodePlace.description
+    })
+
+    // when the place is hover over-ed, make the text bold
+    const element = document.getElementById(nodePlace.getID(id))
+    node.addEventListener('mouseover', function(e) {
+        element.classList.add('hoverOver')
+    })
+    node.addEventListener('mouseleave', function(e) {
+        element.classList.remove('hoverOver')
     })
 }
 

@@ -4,6 +4,7 @@ URL: https://fierce-shelf-08886.herokuapp.com/examples.html
 */
 
 id = 0      // global id counter
+DEBUG = false
 
 function SimpleMapDiagram(width, height) {
     this.nodes = []
@@ -31,7 +32,6 @@ SimpleMapDiagram.prototype = {
     setUp: function(width, height, title, description) {
         mapSetUp(width, height, title, description, this.id)
         initializeNodes(width, height, this.nodes, this.id)
-        initializeControlBox(this.id)
     },
 
     /* add a connection between nodes (x1, y1) and (x2, y2) */
@@ -86,6 +86,11 @@ SimpleMapDiagram.prototype = {
         })
     },
 
+    /* add an information box to display place information */
+    addInfoBox: function() {
+        initializeControlBox(this.id)
+    },
+
     /* add a filter box which will give users the option to filter by certain place type */
     addFilterByClassBox: function(title, description, options) {
         const all_places = this.blockPlaces.concat(this.linePlaces).concat(this.nodePlaces)
@@ -104,6 +109,12 @@ SimpleMapDiagram.prototype = {
             options = getAllItemNames(all_places)
         }
         addFilterBox(options, title, description, all_places, getPlaceByName, this.id)
+    },
+
+    /* add a legend to the map */
+    addLegend: function() {
+        addLegend(getAllItemClasses(this.blockPlaces), 
+            getAllItemClasses(this.linePlaces), getAllItemClasses(this.nodePlaces), this.id)
     }
 }
 
@@ -383,15 +394,19 @@ function createBlockPlace(blockPlace, id, labelSpots) {
         }
     }
     labelSpots.push(tmp_x + '.' + tmp_y)
-    label.style.left = tmp_x * 50 + 'px'
-    label.style.top = tmp_y * 50 + 'px'
+    label.style.left = 50 * (tmp_x - blockPlace.x) + 'px'
+    label.style.top = 50 * (tmp_y - blockPlace.y)+ 'px'
 
     // when the place is clicked, display its information
     block.addEventListener('click', function(e) {
-        const infoLabel = document.getElementById(id + '.selectedLabel')
-        const descriptionLabel = document.getElementById(id + '.descLabel')
-        infoLabel.textContent = blockPlace.name
-        descriptionLabel.textContent = blockPlace.description
+        try {
+            const infoLabel = document.getElementById(id + '.selectedLabel')
+            const descriptionLabel = document.getElementById(id + '.descLabel')
+            infoLabel.textContent = blockPlace.name
+            descriptionLabel.textContent = blockPlace.description
+        } catch (error) {
+            if (DEBUG) console.log('skipping updating info box -- info box not initialized.')
+        }
     })
 
     // when the place is hover over-ed, make the text bold
@@ -465,10 +480,14 @@ function createLinePlace(linePlace, id, labelSpots) {
     
     // when the place is clicked, display its information
     line.addEventListener('click', function(e) {
-        const infoLabel = document.getElementById(id + '.selectedLabel')
-        const descriptionLabel = document.getElementById(id + '.descLabel')
-        infoLabel.textContent = linePlace.name
-        descriptionLabel.textContent = linePlace.description
+        try {
+            const infoLabel = document.getElementById(id + '.selectedLabel')
+            const descriptionLabel = document.getElementById(id + '.descLabel')
+            infoLabel.textContent = linePlace.name
+            descriptionLabel.textContent = linePlace.description
+        } catch (error) {
+            if (DEBUG) console.log('skipping updating info box -- info box not initialized.')
+        }
     })
 
     // when the place is hover over-ed, make the text bold
@@ -520,10 +539,14 @@ function createNodePlace(nodePlace, id, labelSpots) {
 
     // when the place is clicked, display its information
     node.addEventListener('click', function(e) {
-        const infoLabel = document.getElementById(id + '.selectedLabel')
-        const descriptionLabel = document.getElementById(id + '.descLabel')
-        infoLabel.textContent = nodePlace.name
-        descriptionLabel.textContent = nodePlace.description
+        try {
+            const infoLabel = document.getElementById(id + '.selectedLabel')
+            const descriptionLabel = document.getElementById(id + '.descLabel')
+            infoLabel.textContent = nodePlace.name
+            descriptionLabel.textContent = nodePlace.description
+        } catch (error) {
+            if (DEBUG) console.log('skipping updating info box -- info box not initialized.')
+        }
     })
 
     // when the place is hover over-ed, make the text bold
@@ -544,6 +567,88 @@ function toggleHighlightBlockPlace(id) {
     } else {
         element.classList.add('highlight')
     }    
+}
+
+/* function to add a legend to the map */
+function addLegend(blocks, lines, nodes, id) {
+    const controlCentre = document.getElementById(id + '.controlCentre')
+    const legend = document.createElement('div')
+    legend.className = 'controlBox'
+    controlCentre.append(legend)
+
+    // add a title
+    const label = document.createElement('h3')
+    label.append(document.createTextNode('Legend'))
+    const instruction = document.createElement('p')
+    instruction.className = 'controlLabel'
+    instruction.append(document.createTextNode('this is a legend lol'))
+    legend.append(label)
+    legend.append(instruction)
+
+    // add a list of items
+    const list = document.createElement('ul')
+    legend.append(list)
+
+    // block places
+    blocks.map((element) => {
+        const item = document.createElement('li')
+
+        // add a mini icon
+        const icon = document.createElement('div')
+        icon.classList.add('blockIcon')
+        icon.classList.add(element)
+        icon.id = id + '.icb.' + element
+        item.append(icon)
+        list.append(item)
+
+        // add a label
+        const label = document.createElement('label')
+        label.append(document.createTextNode(element))
+        label.htmlFor = icon.id
+        label.className = 'controlLabel'
+        item.append(label)
+    })
+
+    // line places
+    lines.map((element) => {
+        const item = document.createElement('li')
+
+        // add a mini icon
+        const icon = document.createElement('div')
+        icon.classList.add('lineIcon')
+        icon.classList.add(element)
+        icon.id = id + '.icl.' + element
+        item.append(icon)
+        list.append(item)
+
+        // add a label
+        const label = document.createElement('label')
+        label.append(document.createTextNode(element))
+        label.htmlFor = icon.id
+        label.className = 'controlLabel'
+        item.append(label)
+    })
+
+    // node places
+    nodes.map((element) => {
+        const item = document.createElement('li')
+
+        // add a mini icon
+        const icon = document.createElement('div')
+        icon.classList.add('nodeIcon')
+        icon.classList.add(element)
+        icon.id = id + '.icn.' + element
+        item.append(icon)
+        list.append(item)
+
+        // add a label
+        const label = document.createElement('label')
+        label.append(document.createTextNode(element))
+        label.htmlFor = icon.id
+        label.className = 'controlLabel'
+        item.append(label)
+    })
+
 }
 
 /* function to add a menu to filter places by type */
@@ -586,7 +691,7 @@ function addFilterBox(options, title, description, places, elementGetter, id) {
         const elements = elementGetter(element, places, id)
 
         // when a place name is clicked, highlight it on the map
-        item.addEventListener('click', function(e) {
+        checkBox.addEventListener('click', function(e) {
             elements.map((id) => {
                 toggleHighlightBlockPlace(id)
             })

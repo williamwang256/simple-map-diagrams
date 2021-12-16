@@ -142,3 +142,23 @@ ul li {
     color: grey;
     padding: 5px;
 }
+
+/* css for the map legend */
+
+.blockIcon {
+    width: 10px;
+    height: 10px;
+    float: left;
+}
+
+.lineIcon {
+    width: 30px;
+    height: 5px;
+    float: left;
+}
+
+.nodeIcon {
+    width: 10px; 
+    height: 10px; 
+    border-radius: 50%; 
+}

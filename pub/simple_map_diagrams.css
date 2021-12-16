@@ -70,11 +70,11 @@ ul li {
 }
 
 /* shadow on mouseover for all added places*/
-.poi:hover, .street:hover, .park:hover, 
+/*.poi:hover, .street:hover, .park:hover, 
 .building:hover, .water:hover, .transitLine:hover, 
 .specialEvent:hover, .incident:hover {
     box-shadow: 0 0 10px #888888;
-}
+}*/
 
 /* containers css */
 
@@ -125,6 +125,7 @@ ul li {
 
 .hoverOver {
     font-weight: bold;
+    box-shadow: 0 0 10px #888888;
 }
 
 .placeLabel {

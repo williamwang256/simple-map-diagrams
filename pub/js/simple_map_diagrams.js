@@ -218,6 +218,25 @@ function getAllItemNames(elements) {
     return list
 }
 
+/* function to search preliminary locations for labels */
+function searchPreliminaryLocations(x, y, labelSpots) {
+    let tmp_x = x
+    let tmp_y = y
+    if (!labelSpots.includes(tmp_x + '.' + tmp_y)) {
+        // nothing to do here
+    } else if (!labelSpots.includes((tmp_x - 1) + '.' - tmp_y)) {
+        tmp_x--
+    } else if (!labelSpots.includes(tmp_x + '.' + (tmp_y + 1))) {
+        tmp_y--
+    } else if (!labelSpots.includes((tmp_x - 1) + '.' + (tmp_y - 1))) {
+        tmp_x--
+        tmp_y--
+    } else {
+        return null
+    }
+    return [tmp_x, tmp_y]
+}
+
 /*** DOM manipulation functions ***/
 
 /* function to set up the map */
@@ -453,18 +472,10 @@ function createLinePlace(linePlace, id, labelSpots) {
     line.append(label)
 
     // look for free place to put the label
+    const coordinates = searchPreliminaryLocations(linePlace.x1, linePlace.x2, labelSpots)
     let tmp_x = linePlace.x1
-    let tmp_y = linePlace.y1
-        if (!labelSpots.includes(tmp_x + '.' + tmp_y)) {
-        // nothing to do here
-    } else if (!labelSpots.includes((tmp_x - 1) + '.' - tmp_y)) {
-        tmp_x--
-    } else if (!labelSpots.includes(tmp_x + '.' + (tmp_y + 1))) {
-        tmp_y--
-    } else if (!labelSpots.includes((tmp_x - 1) + '.' + (tmp_y - 1))) {
-        tmp_x--
-        tmp_y--
-    } else {
+    let tmp_y = linePlace.x2
+    if (coordinates === null) {
         while (labelSpots.includes(tmp_x + '.' + tmp_y) && tmp_y <= (linePlace.y2 - linePlace.y1)) {
             if (tmp_x - linePlace.x1 >= linePlace.x2 - linePlace.x1) {
                 tmp_y++
@@ -473,7 +484,11 @@ function createLinePlace(linePlace, id, labelSpots) {
                 tmp_x++
             }
         }
+    } else {
+        tmp_x = coordinates[0]
+        tmp_y = coordinates[1]
     }
+
     labelSpots.push(tmp_x + '.' + tmp_y)
     label.style.left = tmp_x * 50 + 'px'
     label.style.top = tmp_y * 50 + 'px'
@@ -521,18 +536,9 @@ function createNodePlace(nodePlace, id, labelSpots) {
     node.append(label)
 
     // look for free place to put the label
-    let tmp_x = nodePlace.x
-    let tmp_y = nodePlace.y
-    if (!labelSpots.includes(tmp_x + '.' + tmp_y)) {
-        // nothing to do here
-    } else if (!labelSpots.includes((tmp_x - 1) + '.' - tmp_y)) {
-        tmp_x--
-    } else if (!labelSpots.includes(tmp_x + '.' + (tmp_y + 1))) {
-        tmp_y--
-    } else if (!labelSpots.includes((tmp_x - 1) + '.' + (tmp_y - 1))) {
-        tmp_x--
-        tmp_y--
-    }
+    const coordinates = searchPreliminaryLocations(nodePlace.x, nodePlace.x, labelSpots)
+    let tmp_x = coordinates[0]
+    let tmp_y = coordinates[1]
     labelSpots.push(tmp_x + '.' + tmp_y)
     label.style.left = tmp_x * 50 + 'px'
     label.style.top = tmp_y * 50 + 'px'
@@ -589,76 +595,39 @@ function addLegend(blocks, lines, nodes, id) {
     const list = document.createElement('table')
     legend.append(list)
 
-    // block places
+    // helper function to create legend rows
+    const createLegendRow = (element, type) => {
+        const row = document.createElement('tr')
+        const iconCell = document.createElement('td')
+        const labelCell = document.createElement('td')
+        row.append(iconCell)
+        row.append(labelCell)
+
+        // add a mini icon
+        const icon = document.createElement('div')
+        icon.classList.add(type + 'Icon')
+        icon.classList.add(element)
+        icon.id = id + '.' + type + '.' + element
+        iconCell.append(icon)
+        list.append(row)
+
+        // add a label
+        const label = document.createElement('label')
+        label.append(document.createTextNode(element))
+        label.htmlFor = icon.id
+        label.className = 'controlLabel'
+        labelCell.append(label)
+    }
+
+    // add all types of elements to the legend
     blocks.map((element) => {
-        const row = document.createElement('tr')
-        const iconCell = document.createElement('td')
-        const labelCell = document.createElement('td')
-        row.append(iconCell)
-        row.append(labelCell)
-
-        // add a mini icon
-        const icon = document.createElement('div')
-        icon.classList.add('blockIcon')
-        icon.classList.add(element)
-        icon.id = id + '.icb.' + element
-        iconCell.append(icon)
-        list.append(row)
-
-        // add a label
-        const label = document.createElement('label')
-        label.append(document.createTextNode(element))
-        label.htmlFor = icon.id
-        label.className = 'controlLabel'
-        labelCell.append(label)
+        createLegendRow(element, 'block')
     })
-
-    // line places
     lines.map((element) => {
-        const row = document.createElement('tr')
-        const iconCell = document.createElement('td')
-        const labelCell = document.createElement('td')
-        row.append(iconCell)
-        row.append(labelCell)
-
-        // add a mini icon
-        const icon = document.createElement('div')
-        icon.classList.add('lineIcon')
-        icon.classList.add(element)
-        icon.id = id + '.icl.' + element
-        iconCell.append(icon)
-        list.append(row)
-
-        // add a label
-        const label = document.createElement('label')
-        label.append(document.createTextNode(element))
-        label.htmlFor = icon.id
-        label.className = 'controlLabel'
-        labelCell.append(label)
+        createLegendRow(element, 'line')
     })
-
-    // node places
     nodes.map((element) => {
-        const row = document.createElement('tr')
-        const iconCell = document.createElement('td')
-        const labelCell = document.createElement('td')
-        row.append(iconCell)
-        row.append(labelCell)
-        
-        // add a mini icon
-        const icon = document.createElement('div')
-        icon.classList.add('nodeIcon')
-        icon.classList.add(element)
-        icon.id = id + '.icn.' + element
-        iconCell.append(icon)
-        list.append(row)
-
-        // add a label
-        const label = document.createElement('label')
-        label.append(document.createTextNode(element))
-        label.htmlFor = icon.id
-        label.className = 'controlLabel'
-        labelCell.append(label)
+        createLegendRow(element, 'node')
     })
 
 }

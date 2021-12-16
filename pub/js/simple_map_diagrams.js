@@ -490,8 +490,8 @@ function createLinePlace(linePlace, id, labelSpots) {
     }
 
     labelSpots.push(tmp_x + '.' + tmp_y)
-    label.style.left = tmp_x * 50 + 'px'
-    label.style.top = tmp_y * 50 + 'px'
+    label.style.left = (tmp_x - linePlace.x1) + 'px'
+    label.style.top = (tmp_y - linePlace.y1) + 'px'
     
     // when the place is clicked, display its information
     line.addEventListener('click', function(e) {
@@ -536,12 +536,12 @@ function createNodePlace(nodePlace, id, labelSpots) {
     node.append(label)
 
     // look for free place to put the label
-    const coordinates = searchPreliminaryLocations(nodePlace.x, nodePlace.x, labelSpots)
+    const coordinates = searchPreliminaryLocations(nodePlace.x, nodePlace.y, labelSpots)
     let tmp_x = coordinates[0]
     let tmp_y = coordinates[1]
     labelSpots.push(tmp_x + '.' + tmp_y)
-    label.style.left = tmp_x * 50 + 'px'
-    label.style.top = tmp_y * 50 + 'px'
+    label.style.left = (tmp_x - nodePlace.x) * 50 + 'px'
+    label.style.top = (tmp_y - nodePlace.y) * 50 + 'px'
 
     // when the place is clicked, display its information
     node.addEventListener('click', function(e) {

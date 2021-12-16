@@ -586,67 +586,79 @@ function addLegend(blocks, lines, nodes, id) {
     legend.append(instruction)
 
     // add a list of items
-    const list = document.createElement('ul')
+    const list = document.createElement('table')
     legend.append(list)
 
     // block places
     blocks.map((element) => {
-        const item = document.createElement('li')
+        const row = document.createElement('tr')
+        const iconCell = document.createElement('td')
+        const labelCell = document.createElement('td')
+        row.append(iconCell)
+        row.append(labelCell)
 
         // add a mini icon
         const icon = document.createElement('div')
         icon.classList.add('blockIcon')
         icon.classList.add(element)
         icon.id = id + '.icb.' + element
-        item.append(icon)
-        list.append(item)
+        iconCell.append(icon)
+        list.append(row)
 
         // add a label
         const label = document.createElement('label')
         label.append(document.createTextNode(element))
         label.htmlFor = icon.id
         label.className = 'controlLabel'
-        item.append(label)
+        labelCell.append(label)
     })
 
     // line places
     lines.map((element) => {
-        const item = document.createElement('li')
+        const row = document.createElement('tr')
+        const iconCell = document.createElement('td')
+        const labelCell = document.createElement('td')
+        row.append(iconCell)
+        row.append(labelCell)
 
         // add a mini icon
         const icon = document.createElement('div')
         icon.classList.add('lineIcon')
         icon.classList.add(element)
         icon.id = id + '.icl.' + element
-        item.append(icon)
-        list.append(item)
+        iconCell.append(icon)
+        list.append(row)
 
         // add a label
         const label = document.createElement('label')
         label.append(document.createTextNode(element))
         label.htmlFor = icon.id
         label.className = 'controlLabel'
-        item.append(label)
+        labelCell.append(label)
     })
 
     // node places
     nodes.map((element) => {
-        const item = document.createElement('li')
-
+        const row = document.createElement('tr')
+        const iconCell = document.createElement('td')
+        const labelCell = document.createElement('td')
+        row.append(iconCell)
+        row.append(labelCell)
+        
         // add a mini icon
         const icon = document.createElement('div')
         icon.classList.add('nodeIcon')
         icon.classList.add(element)
         icon.id = id + '.icn.' + element
-        item.append(icon)
-        list.append(item)
+        iconCell.append(icon)
+        list.append(row)
 
         // add a label
         const label = document.createElement('label')
         label.append(document.createTextNode(element))
         label.htmlFor = icon.id
         label.className = 'controlLabel'
-        item.append(label)
+        labelCell.append(label)
     })
 
 }

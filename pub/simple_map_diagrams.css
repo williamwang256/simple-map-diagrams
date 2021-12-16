@@ -79,21 +79,20 @@ ul li {
 /* containers css */
 
 .SMDcontainer {
-    border: 3px solid grey;
     position: relative;
     overflow: auto;
     width: auto;
-    padding: 5px;
+    padding: 15px;
     margin: 50px;
+    border-radius: 10px;
 }
 
 .mapContainer {
     position: relative;
-    border: 3px solid lightgrey;
-    padding: 5px;
+    padding: 10px;
     float:left;
     background-color: rgb(229, 234, 240);
-    margin:5px;
+    margin:15px;
 }
 
 .titleContainer {
@@ -101,19 +100,22 @@ ul li {
     padding: 5px;
     float:left;
     margin:5px;
+    width: 100%;
 }
 
 .controlBox {
-    border: 3px solid lightgrey;
     position: relative;
     width: 300px;
     height: auto;
     padding: 20px;
-    margin:5px;
-    }
+    margin: 5px;
+}
 
 .controlContainer {
     float: left;
+    box-shadow: 0 0 10px #888888;
+    border-radius: 10px;
+    margin: 10px;
 }
 
 /* misc. css */

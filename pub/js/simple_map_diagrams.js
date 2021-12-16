@@ -249,12 +249,6 @@ function mapSetUp(width, height, title, description, id) {
     container.className = 'SMDcontainer'
     body.append(container)
 
-    // create a container for the control menus
-    const controlCentre = document.createElement('div')
-    controlCentre.id = id + '.controlCentre'
-    controlCentre.className = 'controlContainer'
-    container.append(controlCentre)
-
     // create a title and subtitle
     const titleContainer = document.createElement('div')
     const titleElement = document.createElement('h3')
@@ -271,10 +265,17 @@ function mapSetUp(width, height, title, description, id) {
     // create a container for the map
     const mapContainer = document.createElement('div')
     mapContainer.id = id + '.mapContainer'
-    mapContainer.className = 'mapContainer'
-    mapContainer.style.height = (height * 50 + 60) + 'px'
-    mapContainer.style.width = (width * 50 + 60) + 'px'
+    mapContainer.className = 'controlContainer'
     container.append(mapContainer)
+
+
+
+    const map = document.createElement('div')
+    map.id = id + '.map'
+    map.className = 'mapContainer'
+    map.style.height = (height * 50 + 60) + 'px'
+    map.style.width = (width * 50 + 60) + 'px'
+    mapContainer.append(map)
     
     // create a container for the nodes
     const nodes = document.createElement('div')
@@ -292,12 +293,18 @@ function mapSetUp(width, height, title, description, id) {
     const nodePlaces = document.createElement('div')
     nodePlaces.id = id + '.nodePlacesContainer'
 
+    // create a container for the control menus
+    const controlCentre = document.createElement('div')
+    controlCentre.id = id + '.controlCentre'
+    controlCentre.className = 'controlContainer'
+    container.append(controlCentre)
+
     // add to the main map container
-    mapContainer.appendChild(nodes)
-    mapContainer.appendChild(connections)
-    mapContainer.appendChild(blockPlaces)
-    mapContainer.appendChild(linePlaces)
-    mapContainer.appendChild(nodePlaces)
+    map.appendChild(nodes)
+    map.appendChild(connections)
+    map.appendChild(blockPlaces)
+    map.appendChild(linePlaces)
+    map.appendChild(nodePlaces)
 }
 
 /* function to set up the info box */
@@ -337,8 +344,8 @@ function initializeNodes(width, height, nodes, id) {
             node.style.top = j * 50 + 50 + 'px'
             node.id = id + '.sn.' + i + '.' + j
             nodes[i][j] = {
-                description: '',
-                id: node.id
+                id: node.id,
+                neighbours: []
             }
             item.appendChild(node)
             column.appendChild(item)
@@ -354,7 +361,7 @@ function addConnection(x1, y1, x2, y2, nodes, id) {
     line.classList.add('line')
     line.classList.add('connection')
 
-    /* determine the width of the connection line */
+    // determine the width of the connection line
     let width = 5;
     if (x1 !== x2) {
         width = ((x2 - x1) * 50)
@@ -364,7 +371,7 @@ function addConnection(x1, y1, x2, y2, nodes, id) {
         document.getElementById(nodes[x2][y1].id).classList.add('intersection')
     }
     
-    /* determine the height of the connection line */
+    // determine the height of the connection line
     let height = 5;
     if (y1 !== y2) {
         height = ((y2 - y1) * 50)
@@ -374,7 +381,25 @@ function addConnection(x1, y1, x2, y2, nodes, id) {
         document.getElementById(nodes[x1][y2].id).classList.add('intersection')
     }
 
-    /* create the element */
+    // update neighbours
+    for (let i = x1; i <= x2; i++) {
+        if (i > 0) {
+            nodes[i][y1].neighbours.push(parseInt(i-1) + '.' + parseInt(y1))
+        }
+        if (i < x2) {
+            nodes[i][y1].neighbours.push(parseInt(i+1) + '.' + parseInt(y1))
+        }
+    }
+    for (let i = y1; i <= y2; i++) {
+        if (i > 0) {
+            nodes[x1][i].neighbours.push(parseInt(x1) + '.' + parseInt(i-1))
+        }
+        if (i < y2) {
+            nodes[x1][i].neighbours.push(parseInt(x1) + '.' + parseInt(i+1))
+        }
+    }
+
+    // create the element
     line.style.width = width + 'px'
     line.style.height = height + 'px'
     line.style.left = (50 * (x1 + 1) + 5) + 'px'

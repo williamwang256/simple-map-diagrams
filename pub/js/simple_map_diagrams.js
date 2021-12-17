@@ -6,6 +6,10 @@ URL: https://fierce-shelf-08886.herokuapp.com/examples.html
 id = 0      // global id counter
 DEBUG = false
 
+current = null
+source = null
+destination = null
+
 function SimpleMapDiagram(width, height) {
     this.nodes = []
     this.streets = []
@@ -88,7 +92,8 @@ SimpleMapDiagram.prototype = {
 
     /* add an information box to display place information */
     addInfoBox: function() {
-        initializeControlBox(this.id)
+        console.log(this.width, this.height, this.nodes)
+        initializeControlBox(this.id, this.width, this.height, this.nodes)
     },
 
     /* add a filter box which will give users the option to filter by certain place type */
@@ -115,12 +120,6 @@ SimpleMapDiagram.prototype = {
     addLegend: function() {
         addLegend(getAllItemClasses(this.blockPlaces), 
             getAllItemClasses(this.linePlaces), getAllItemClasses(this.nodePlaces), this.id)
-    },
-
-    /* draw a path between two specified nodes on the graph, if possible */
-    navigate: function(x1, y1, x2, y2) {
-        const path = findShortestPath(x1, y1, x2, y2, this.width, this.height, this.nodes)
-        drawPath(path, this.id)
     }
 }
 
@@ -263,7 +262,6 @@ function findShortestPath(x1, y1, x2, y2, width, height, nodes) {
                 ret.push(curr)
                 curr = curr.parent
             }
-            console.log(ret)
             return ret
         }
         for (let i = 0; i < u.neighbours.length; i++) {
@@ -307,6 +305,7 @@ function mapSetUp(width, height, title, description, id) {
     mapContainer.className = 'controlContainer'
     container.append(mapContainer)
 
+    // the map itself
     const map = document.createElement('div')
     map.id = id + '.map'
     map.className = 'mapContainer'
@@ -330,22 +329,29 @@ function mapSetUp(width, height, title, description, id) {
     const nodePlaces = document.createElement('div')
     nodePlaces.id = id + '.nodePlacesContainer'
 
+    // add to the main map container
+    map.append(nodes)
+    map.append(connections)
+    map.append(blockPlaces)
+    map.append(linePlaces)
+    map.append(nodePlaces)
+
     // create a container for the control menus
     const controlCentre = document.createElement('div')
     controlCentre.id = id + '.controlCentre'
     controlCentre.className = 'controlContainer'
     container.append(controlCentre)
 
-    // add to the main map container
-    map.appendChild(nodes)
-    map.appendChild(connections)
-    map.appendChild(blockPlaces)
-    map.appendChild(linePlaces)
-    map.appendChild(nodePlaces)
+    // create a container for the navigation route
+    const navigationContainer = document.createElement('div')
+    navigationContainer.id = id + '.navigationContainer'
+    map.append(navigationContainer)
+
+    
 }
 
 /* function to set up the info box */
-function initializeControlBox(id) {
+function initializeControlBox(id, width, height, nodes) {
     const mapContainer = document.getElementById(id + '.mapContainer')
     const controlBox = document.createElement('div')
     controlBox.className = 'controlBox'
@@ -358,6 +364,40 @@ function initializeControlBox(id) {
     descriptionLabel.id = id + '.descLabel'
     descriptionLabel.className = 'controlLabel'
 
+    // button to mark the source
+    const srcButton = document.createElement('button')
+    controlBox.append(srcButton)
+    srcButton.className = ('navigateButton')
+    srcButton.append(document.createTextNode('Mark as source'))
+    srcButton.addEventListener('click', function(e) { source = current })
+
+    // button to mark the destination
+    const destButton = document.createElement('button')
+    controlBox.append(destButton)
+    destButton.className = ('navigateButton')
+    destButton.append(document.createTextNode('Mark as destination'))
+    destButton.addEventListener('click', function(e) { destination = current })
+
+    // button to display navigation on screen
+    const navigateButton = document.createElement('button')
+    controlBox.append(navigateButton)
+    navigateButton.className = ('navigateButton')
+    navigateButton.append(document.createTextNode('Navigate!'))
+    navigateButton.addEventListener('click', function(e) {
+        console.log(source, destination)
+        const path = findShortestPath(
+            source.x, 
+            source.y, 
+            destination.x, 
+            destination.y, 
+            width, 
+            height, 
+            nodes
+        )
+        drawPath(path, id)
+    })
+
+    // add the labels
     controlBox.append(infoLabel)
     controlBox.append(descriptionLabel)
     infoLabel.append(document.createTextNode(''))
@@ -370,7 +410,7 @@ function initializeControlBox(id) {
 function initializeNodes(width, height, nodes, id) {
     const nodesContainer = document.getElementById(id + '.nodes')
 
-    /* initialize a 2D grid of nodes */ 
+    // initialize a 2D grid of nodes
     for (let i = 0; i < width; i++) {
         const column = document.createElement('ul')
         nodes[i] = []
@@ -425,21 +465,17 @@ function addConnection(x1, y1, x2, y2, nodes, id) {
     // update neighbours
     for (let i = x1; i <= x2; i++) {
         if (i > 0) {
-            // nodes[i][y1].neighbours.push(parseInt(i-1) + '.' + parseInt(y1))
             nodes[i][y1].neighbours.push(nodes[i-1][y1])
         }
         if (i < x2) {
-            //nodes[i][y1].neighbours.push(parseInt(i+1) + '.' + parseInt(y1))
             nodes[i][y1].neighbours.push(nodes[i+1][y1])
         }
     }
     for (let i = y1; i <= y2; i++) {
         if (i > 0) {
-            // nodes[x1][i].neighbours.push(parseInt(x1) + '.' + parseInt(i-1))
             nodes[x1][i].neighbours.push(nodes[x1][i-1])
         }
         if (i < y2) {
-            // nodes[x1][i].neighbours.push(parseInt(x1) + '.' + parseInt(i+1))
             nodes[x1][i].neighbours.push(nodes[x1][i+1])
         }
     }
@@ -493,6 +529,7 @@ function createBlockPlace(blockPlace, id, labelSpots) {
             const descriptionLabel = document.getElementById(id + '.descLabel')
             infoLabel.textContent = blockPlace.name
             descriptionLabel.textContent = blockPlace.description
+            current = blockPlace
         } catch (error) {
             if (DEBUG) console.log('skipping updating info box -- info box not initialized.')
         }
@@ -570,6 +607,7 @@ function createLinePlace(linePlace, id, labelSpots) {
             const descriptionLabel = document.getElementById(id + '.descLabel')
             infoLabel.textContent = linePlace.name
             descriptionLabel.textContent = linePlace.description
+            current = linePlace
         } catch (error) {
             if (DEBUG) console.log('skipping updating info box -- info box not initialized.')
         }
@@ -620,6 +658,7 @@ function createNodePlace(nodePlace, id, labelSpots) {
             const descriptionLabel = document.getElementById(id + '.descLabel')
             infoLabel.textContent = nodePlace.name
             descriptionLabel.textContent = nodePlace.description
+            current = nodePlace
         } catch (error) {
             if (DEBUG) console.log('skipping updating info box -- info box not initialized.')
         }
@@ -752,6 +791,28 @@ function addFilterBox(options, title, description, places, elementGetter, id) {
 
 /* function to draw a path between two nodes on the map */
 function drawPath(path, id) {
+    // draw source
+    const navigationContainer = document.getElementById(id + '.navigationContainer')
+    navigationContainer.textContent = ''
+    const source = document.createElement('div')
+    source.id = id + 'source'
+    source.style.left = path[0].x * 50 + 50 + 'px'
+    source.style.top = path[0].y * 50 + 50 + 'px'
+    source.classList.add('node')
+    source.classList.add('navigationEndPoint')
+    source.style.zIndex = 5
+    navigationContainer.append(source)
+
+    // draw destination
+    const dest = document.createElement('div')
+    dest.id = id + 'dest'
+    dest.style.left = path[path.length-1].x * 50 + 50 + 'px'
+    dest.style.top = path[path.length-1].y * 50 + 50 + 'px'
+    dest.classList.add('node')
+    dest.classList.add('navigationEndPoint')
+    dest.style.zIndex = 5
+    navigationContainer.append(dest)
+    
     for (let i = 1; i < path.length; i++) {
 
         const x1 = path[i - 1].x
@@ -759,7 +820,6 @@ function drawPath(path, id) {
         const x2 = path[i].x
         const y2 = path[i].y
 
-        const connectionsContainer = document.getElementById(id + '.connectionsContainer')
         const line = document.createElement('div')
         line.classList.add('line')
         line.classList.add('path')
@@ -782,6 +842,6 @@ function drawPath(path, id) {
         line.style.left = (50 * (Math.min(x1, x2) + 1) + 5) + 'px'
         line.style.top = (50 * (Math.min(y1, y2) + 1) + 5) + 'px'
         line.style.zIndex = 4
-        connectionsContainer.append(line)
+        navigationContainer.append(line)
     }
 }

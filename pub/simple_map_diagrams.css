@@ -15,7 +15,7 @@ ul li {
 
 .path {
     background-color: #669df6;
-    box-shadow: 0 0 10px #669df6    ;
+    box-shadow: 0 0 10px #669df6;
 }
 
 .street {
@@ -72,6 +72,12 @@ ul li {
 .intersection {
     border: 3px solid darkgray;
     background-color: grey;
+}
+
+.navigationEndPoint {
+    border: 3px solid darkcyan;
+    background-color: #669df6;
+    box-shadow: 0 0 10px #669df6    ;
 }
 
 /* shadow on mouseover for all added places*/
@@ -170,4 +176,12 @@ ul li {
     width: 10px; 
     height: 10px; 
     border-radius: 50%; 
+}
+
+
+
+
+
+.navigateButton {
+    margin: 10px;
 }

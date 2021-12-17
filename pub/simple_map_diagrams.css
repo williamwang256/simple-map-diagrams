@@ -2,11 +2,26 @@ ul li {
     list-style: none;
 }
 
+button {
+  background-color: #e7e7e7;
+  border: none;
+  color: black;
+  padding: 10px 15px;
+  display: inline-block;
+  margin: 4px 2px;
+  cursor: pointer;
+  width: 250px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px #e7e7e7;
+  font-weight: bold;
+}
+
 /* lines css */
 
 .line {
     position: absolute;
     z-index: 1;
+    cursor: pointer;
 }
 
 .connection {
@@ -30,6 +45,7 @@ ul li {
 
 .block {
     position: absolute;
+    cursor: pointer;
 }
 
 .park {
@@ -52,6 +68,7 @@ ul li {
     border-radius: 50%; 
     position: absolute;
     z-index: 2;
+    cursor: pointer;
 }
 
 .poi {
@@ -149,6 +166,7 @@ ul li {
     color: #333333;
     padding: 5px;
     z-index: 2;
+    cursor: pointer;
 }
 
 .controlLabel {

@@ -7,8 +7,8 @@ id = 0      // global id counter
 DEBUG = false
 
 current = null
-source = null
-destination = null
+source = undefined
+destination = undefined
 
 function SimpleMapDiagram(width, height) {
     this.nodes = []
@@ -92,7 +92,6 @@ SimpleMapDiagram.prototype = {
 
     /* add an information box to display place information */
     addInfoBox: function() {
-        console.log(this.width, this.height, this.nodes)
         initializeControlBox(this.id, this.width, this.height, this.nodes)
     },
 
@@ -243,13 +242,7 @@ function searchPreliminaryLocations(x, y, labelSpots) {
 }
 
 /* function to find a path between two locations, using Breadth First Search */
-function findShortestPath(x1, y1, x2, y2, width, height, nodes) {
-    for (let i = 0; i < width; i++) {
-        for (let j = 0; j < height; j++) {
-            nodes[i][j].visited = false
-            nodes[i][j].parent = null
-        }
-    }
+function findShortestPath(x1, y1, x2, y2, nodes) {
     nodes[x1][y1].visited = true
     const queue = []
     queue.push(nodes[x1][y1])
@@ -272,6 +265,23 @@ function findShortestPath(x1, y1, x2, y2, width, height, nodes) {
             }
         }
     }
+}
+
+/* function to clear the tree structure formed by BFS, and remove nav on map */
+function clearNavigation(width, height, nodes, id) {
+    for (let i = 0; i < width; i++) {
+        for (let j = 0; j < height; j++) {
+            nodes[i][j].visited = false
+            nodes[i][j].parent = null
+        }
+    }
+    const navigationContainer = document.getElementById(id + '.navigationContainer')
+    navigationContainer.textContent = ''
+    const srcLabel = document.getElementById(id + '.srcLabel')
+    const destLabel = document.getElementById(id + '.destLabel')
+    srcLabel.textContent = 'Select an item to mark as source.'
+    destLabel.textContent = 'Select an item to mark as destination.'
+
 }
 
 /*** DOM manipulation functions ***/
@@ -363,44 +373,90 @@ function initializeControlBox(id, width, height, nodes) {
     const descriptionLabel = document.createElement('p')
     descriptionLabel.id = id + '.descLabel'
     descriptionLabel.className = 'controlLabel'
+    controlBox.append(infoLabel)
+    controlBox.append(descriptionLabel)
+
+    // labels to display navigation information
+    const navLabel = document.createElement('h4')
+    navLabel.append(document.createTextNode('Navigation'))
+    const list = document.createElement('ul')
+    const srcLabel = document.createElement('li')
+    srcLabel.id = id + '.srcLabel'
+    srcLabel.className = 'controlLabel'
+    srcLabel.append(document.createTextNode('Select an item to mark as source.'))
+    const destLabel = document.createElement('li')
+    destLabel.id = id + '.destLabel'
+    destLabel.className = 'controlLabel'
+    destLabel.append(document.createTextNode('Select an item to mark as destination.'))
+    list.append(srcLabel)
+    list.append(destLabel)
+    controlBox.append(navLabel)
+    controlBox.append(list)
 
     // button to mark the source
     const srcButton = document.createElement('button')
     controlBox.append(srcButton)
-    srcButton.className = ('navigateButton')
-    srcButton.append(document.createTextNode('Mark as source'))
-    srcButton.addEventListener('click', function(e) { source = current })
+    srcButton.className = 'navigateButton'
+    srcButton.append(document.createTextNode('Mark current location as source'))
+    srcButton.addEventListener('click', function(e) {
+        if (current.x === undefined) {
+            alert('Unsupported location.')
+        } else {
+            source = current
+            srcLabel.textContent = 'Source: ' + current.name
+        }
+    })
 
     // button to mark the destination
     const destButton = document.createElement('button')
     controlBox.append(destButton)
-    destButton.className = ('navigateButton')
-    destButton.append(document.createTextNode('Mark as destination'))
-    destButton.addEventListener('click', function(e) { destination = current })
+    destButton.className = 'navigateButton'
+    destButton.append(document.createTextNode('Mark current location as destination'))
+    destButton.addEventListener('click', function(e) {
+        if (current.x === undefined) {
+            alert('Unsupported location.')
+        } else {
+            destination = current 
+            destLabel.textContent = 'Destination: ' + current.name
+        }
+    })
 
     // button to display navigation on screen
     const navigateButton = document.createElement('button')
     controlBox.append(navigateButton)
-    navigateButton.className = ('navigateButton')
+    navigateButton.className = 'navigateButton'
     navigateButton.append(document.createTextNode('Navigate!'))
     navigateButton.addEventListener('click', function(e) {
-        console.log(source, destination)
-        const path = findShortestPath(
-            source.x, 
-            source.y, 
-            destination.x, 
-            destination.y, 
-            width, 
-            height, 
-            nodes
-        )
-        drawPath(path, id)
+        clearNavigation(width, height, nodes, id)
+        if (source === undefined || destination === undefined) {
+            alert('Missing source or destination.')
+        } else {
+            const path = findShortestPath(
+                source.x, 
+                source.y, 
+                destination.x, 
+                destination.y,
+                nodes
+            )
+            if (path === undefined) {
+                alert('Could not find a path.')
+                clearNavigation(width, height, nodes, id)
+            } else {
+                drawPath(path, id)
+            }
+            source = undefined
+            destination = undefined
+        }
     })
 
-    // add the labels
-    controlBox.append(infoLabel)
-    controlBox.append(descriptionLabel)
-    infoLabel.append(document.createTextNode(''))
+    // button to clear navigation
+    const clearButton = document.createElement('button')
+    controlBox.append(clearButton)
+    clearButton.className = 'navigateButton'
+    clearButton.append(document.createTextNode('Clear'))
+    clearButton.addEventListener('click', function(e) {
+        clearNavigation(width, height, nodes, id)
+    })
 
     // add to the document
     mapContainer.append(controlBox)
@@ -793,7 +849,6 @@ function addFilterBox(options, title, description, places, elementGetter, id) {
 function drawPath(path, id) {
     // draw source
     const navigationContainer = document.getElementById(id + '.navigationContainer')
-    navigationContainer.textContent = ''
     const source = document.createElement('div')
     source.id = id + 'source'
     source.style.left = path[0].x * 50 + 50 + 'px'

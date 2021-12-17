@@ -9,6 +9,7 @@ DEBUG = false
 current = null
 source = undefined
 destination = undefined
+state = 'view'
 
 function SimpleMapDiagram(width, height) {
     this.nodes = []
@@ -33,41 +34,41 @@ function SimpleMapDiagram(width, height) {
 SimpleMapDiagram.prototype = {
 
     /* set up all the nodes on the grid */
-    setUp: function(width, height, title, description) {
-        mapSetUp(width, height, title, description, this.id)
-        initializeNodes(width, height, this.nodes, this.id)
+    setUp: function(title, description) {
+        mapSetUp.bind(this)(title, description)
+        initializeNodes.bind(this)(this.width, this.height)
     },
 
     /* add a connection between nodes (x1, y1) and (x2, y2) */
     addConnection: function(x1, y1, x2, y2) {
-        addConnection(x1, y1, x2, y2, this.nodes, this.id)
+        addConnection.bind(this)(x1, y1, x2, y2)
     },
 
     /* adds multiple connections */
     addMultipleConnections: function(connections) {
         connections.map((element) => {
-            addConnection(element[0], element[1], element[2], element[3], this.nodes, this.id)
+            addConnection.bind(this)(element[0], element[1], element[2], element[3])
         })
     },
 
     /* add a block place to the map. note: type must match one of the pre-defined types */
     addBlockPlace: function(x, y, width, height, name, type, description) {
         const blockPlace = new BlockPlace(x, y, width, height, name, type, description)
-        createBlockPlace(blockPlace, this.id, this.labelSpots)
+        createBlockPlace.bind(this)(blockPlace)
         this.blockPlaces.push(blockPlace)
     },
 
     /* add a line place to the map. note: type must match one of the pre-defined types */
     addLinePlace: function(x1, y1, x2, y2, name, type, description) {
         const linePlace = new LinePlace(x1, y1, x2, y2, name, type, description)
-        createLinePlace(linePlace, this.id, this.labelSpots)
+        createLinePlace.bind(this)(linePlace)
         this.linePlaces.push(linePlace)
     },
 
     /* add a node place to the map. note: type must match one of the pre-defined types */
     addNodePlace: function(x, y, name, type, description) {
         const nodePlace = new NodePlace(x, y, name, type, description)
-        createNodePlace(nodePlace, this.id, this.labelSpots)
+        createNodePlace.bind(this)(nodePlace)
         this.nodePlaces.push(nodePlace)
     },
 
@@ -92,7 +93,7 @@ SimpleMapDiagram.prototype = {
 
     /* add an information box to display place information */
     addInfoBox: function() {
-        initializeControlBox(this.id, this.width, this.height, this.nodes)
+        initializeControlBox.bind(this)()
     },
 
     /* add a filter box which will give users the option to filter by certain place type */
@@ -102,7 +103,7 @@ SimpleMapDiagram.prototype = {
         if (!options) {
             options = getAllItemClasses(all_places)
         }
-        addFilterBox(options, title, description, all_places, getAllPlacesByClass, this.id)
+        addFilterBox.bind(this)(options, title, description, all_places, getAllPlacesByClass)
     },
 
     /* add a filter box which will give users the option to filter by certain place type */
@@ -112,7 +113,7 @@ SimpleMapDiagram.prototype = {
         if (!options) {
             options = getAllItemNames(all_places)
         }
-        addFilterBox(options, title, description, all_places, getPlaceByName, this.id)
+        addFilterBox.bind(this)(options, title, description, all_places, getPlaceByName)
     },
 
     /* add a legend to the map */
@@ -179,22 +180,22 @@ class NodePlace {
 /*** Helper functions ***/
 
 /* return a list of all places of a certain class */
-function getAllPlacesByClass(type, elements, id) {
+function getAllPlacesByClass(type, elements) {
     const list = []
     elements.map((element) => {
         if (element.class === type) {
-            list.push(element.getID(id))
+            list.push(element.getID(this.id))
         }
     })
     return list
 }
 
 /* get a certain place */
-function getPlaceByName(name, elements, id) {
+function getPlaceByName(name, elements) {
     const list = []
     elements.map((element) => {
         if (element.name === name) {
-            list.push(element.getID(id))
+            list.push(element.getID(this.id))
         }
     })
     return list
@@ -223,16 +224,16 @@ function getAllItemNames(elements) {
 }
 
 /* function to search preliminary locations for labels */
-function searchPreliminaryLocations(x, y, labelSpots) {
+function searchPreliminaryLocations(x, y) {
     let tmp_x = x
     let tmp_y = y
-    if (!labelSpots.includes(tmp_x + '.' + tmp_y)) {
+    if (!this.labelSpots.includes(tmp_x + '.' + tmp_y)) {
         // nothing to do here
-    } else if (!labelSpots.includes((tmp_x - 1) + '.' - tmp_y)) {
+    } else if (!this.labelSpots.includes((tmp_x - 1) + '.' - tmp_y)) {
         tmp_x--
-    } else if (!labelSpots.includes(tmp_x + '.' + (tmp_y + 1))) {
+    } else if (!this.labelSpots.includes(tmp_x + '.' + (tmp_y + 1))) {
         tmp_y--
-    } else if (!labelSpots.includes((tmp_x - 1) + '.' + (tmp_y - 1))) {
+    } else if (!this.labelSpots.includes((tmp_x - 1) + '.' + (tmp_y - 1))) {
         tmp_x--
         tmp_y--
     } else {
@@ -242,13 +243,13 @@ function searchPreliminaryLocations(x, y, labelSpots) {
 }
 
 /* function to find a path between two locations, using Breadth First Search */
-function findShortestPath(x1, y1, x2, y2, nodes) {
-    nodes[x1][y1].visited = true
+function findShortestPath(x1, y1, x2, y2) {
+    this.nodes[x1][y1].visited = true
     const queue = []
-    queue.push(nodes[x1][y1])
+    queue.push(this.nodes[x1][y1])
     while (queue.length !== 0) {
         u = queue.shift()
-        if (u === nodes[x2][y2]) {
+        if (u === this.nodes[x2][y2]) {
             let curr = u
             const ret = []
             while (curr !== null) {
@@ -268,17 +269,17 @@ function findShortestPath(x1, y1, x2, y2, nodes) {
 }
 
 /* function to clear the tree structure formed by BFS, and remove nav on map */
-function clearNavigation(width, height, nodes, id) {
-    for (let i = 0; i < width; i++) {
-        for (let j = 0; j < height; j++) {
-            nodes[i][j].visited = false
-            nodes[i][j].parent = null
+function clearNavigation() {
+    for (let i = 0; i < this.width; i++) {
+        for (let j = 0; j < this.height; j++) {
+            this.nodes[i][j].visited = false
+            this.nodes[i][j].parent = null
         }
     }
-    const navigationContainer = document.getElementById(id + '.navigationContainer')
+    const navigationContainer = document.getElementById(this.id + '.navigationContainer')
     navigationContainer.textContent = ''
-    const srcLabel = document.getElementById(id + '.srcLabel')
-    const destLabel = document.getElementById(id + '.destLabel')
+    const srcLabel = document.getElementById(this.id + '.srcLabel')
+    const destLabel = document.getElementById(this.id + '.destLabel')
     srcLabel.textContent = 'Select an item to mark as source.'
     destLabel.textContent = 'Select an item to mark as destination.'
 
@@ -287,12 +288,12 @@ function clearNavigation(width, height, nodes, id) {
 /*** DOM manipulation functions ***/
 
 /* function to set up the map */
-function mapSetUp(width, height, title, description, id) {
+function mapSetUp(title, description) {
     const body = $('body')
 
     // create a container for this Simple Map Diagram
     const container = document.createElement('div')
-    container.id = id + '.SMDcontainer'
+    container.id = this.id + '.SMDcontainer'
     container.className = 'SMDcontainer'
     body.append(container)
 
@@ -303,7 +304,7 @@ function mapSetUp(width, height, title, description, id) {
     const subtitle = document.createElement('p')
     subtitle.className = 'controlLabel'
     subtitle.append(document.createTextNode(description))
-    titleContainer.id = id + '.titleContainer'
+    titleContainer.id = this.id + '.titleContainer'
     titleContainer.className = 'titleContainer'
     titleContainer.append(titleElement)
     titleContainer.append(subtitle)
@@ -311,33 +312,33 @@ function mapSetUp(width, height, title, description, id) {
 
     // create a container for the map
     const mapContainer = document.createElement('div')
-    mapContainer.id = id + '.mapContainer'
+    mapContainer.id = this.id + '.mapContainer'
     mapContainer.className = 'controlContainer'
     container.append(mapContainer)
 
     // the map itself
     const map = document.createElement('div')
-    map.id = id + '.map'
+    map.id = this.id + '.map'
     map.className = 'mapContainer'
-    map.style.height = (height * 50 + 60) + 'px'
-    map.style.width = (width * 50 + 60) + 'px'
+    map.style.height = (this.height * 50 + 60) + 'px'
+    map.style.width = (this.width * 50 + 60) + 'px'
     mapContainer.append(map)
     
     // create a container for the nodes
     const nodes = document.createElement('div')
-    nodes.id = id + '.nodes'
+    nodes.id = this.id + '.nodes'
 
     // create a container for the connections
     const connections = document.createElement('div')
-    connections.id = id + '.connectionsContainer'
+    connections.id = this.id + '.connectionsContainer'
 
     // create container for the places
     const blockPlaces = document.createElement('div')
-    blockPlaces.id = id + '.blockPlacesContainer'
+    blockPlaces.id = this.id + '.blockPlacesContainer'
     const linePlaces = document.createElement('div')
-    linePlaces.id = id + '.linePlacesContainer'
+    linePlaces.id = this.id + '.linePlacesContainer'
     const nodePlaces = document.createElement('div')
-    nodePlaces.id = id + '.nodePlacesContainer'
+    nodePlaces.id = this.id + '.nodePlacesContainer'
 
     // add to the main map container
     map.append(nodes)
@@ -348,30 +349,28 @@ function mapSetUp(width, height, title, description, id) {
 
     // create a container for the control menus
     const controlCentre = document.createElement('div')
-    controlCentre.id = id + '.controlCentre'
+    controlCentre.id = this.id + '.controlCentre'
     controlCentre.className = 'controlContainer'
     container.append(controlCentre)
 
     // create a container for the navigation route
     const navigationContainer = document.createElement('div')
-    navigationContainer.id = id + '.navigationContainer'
+    navigationContainer.id = this.id + '.navigationContainer'
     map.append(navigationContainer)
-
-    
 }
 
 /* function to set up the info box */
-function initializeControlBox(id, width, height, nodes) {
-    const mapContainer = document.getElementById(id + '.mapContainer')
+function initializeControlBox() {
+    const mapContainer = document.getElementById(this.id + '.mapContainer')
     const controlBox = document.createElement('div')
     controlBox.className = 'controlBox'
 
     // labels to display information
     const infoLabel = document.createElement('h4')
-    infoLabel.id = id + '.selectedLabel'
+    infoLabel.id = this.id + '.selectedLabel'
     infoLabel.append(document.createTextNode('Click an item to start.'))
     const descriptionLabel = document.createElement('p')
-    descriptionLabel.id = id + '.descLabel'
+    descriptionLabel.id = this.id + '.descLabel'
     descriptionLabel.className = 'controlLabel'
     controlBox.append(infoLabel)
     controlBox.append(descriptionLabel)
@@ -381,11 +380,11 @@ function initializeControlBox(id, width, height, nodes) {
     navLabel.append(document.createTextNode('Navigation'))
     const list = document.createElement('ul')
     const srcLabel = document.createElement('li')
-    srcLabel.id = id + '.srcLabel'
+    srcLabel.id = this.id + '.srcLabel'
     srcLabel.className = 'controlLabel'
     srcLabel.append(document.createTextNode('Select an item to mark as source.'))
     const destLabel = document.createElement('li')
-    destLabel.id = id + '.destLabel'
+    destLabel.id = this.id + '.destLabel'
     destLabel.className = 'controlLabel'
     destLabel.append(document.createTextNode('Select an item to mark as destination.'))
     list.append(srcLabel)
@@ -397,52 +396,37 @@ function initializeControlBox(id, width, height, nodes) {
     const srcButton = document.createElement('button')
     controlBox.append(srcButton)
     srcButton.className = 'navigateButton'
-    srcButton.append(document.createTextNode('Mark current location as source'))
-    srcButton.addEventListener('click', function(e) {
-        if (current.x === undefined) {
-            alert('Unsupported location.')
-        } else {
-            source = current
-            srcLabel.textContent = 'Source: ' + current.name
-        }
-    })
+    srcButton.append(document.createTextNode('Choose starting point'))
+    srcButton.addEventListener('click', () => { state = 'selectSrc' })
 
     // button to mark the destination
     const destButton = document.createElement('button')
     controlBox.append(destButton)
     destButton.className = 'navigateButton'
-    destButton.append(document.createTextNode('Mark current location as destination'))
-    destButton.addEventListener('click', function(e) {
-        if (current.x === undefined) {
-            alert('Unsupported location.')
-        } else {
-            destination = current 
-            destLabel.textContent = 'Destination: ' + current.name
-        }
-    })
+    destButton.append(document.createTextNode('Choose destination'))
+    destButton.addEventListener('click', () => { state = 'selectDest' })
 
     // button to display navigation on screen
     const navigateButton = document.createElement('button')
     controlBox.append(navigateButton)
     navigateButton.className = 'navigateButton'
     navigateButton.append(document.createTextNode('Navigate!'))
-    navigateButton.addEventListener('click', function(e) {
-        clearNavigation(width, height, nodes, id)
+    navigateButton.addEventListener('click', () => {
+        clearNavigation.bind(this)()
         if (source === undefined || destination === undefined) {
             alert('Missing source or destination.')
         } else {
-            const path = findShortestPath(
+            const path = findShortestPath.bind(this)(
                 source.x, 
                 source.y, 
                 destination.x, 
                 destination.y,
-                nodes
             )
             if (path === undefined) {
                 alert('Could not find a path.')
-                clearNavigation(width, height, nodes, id)
+                clearNavigation.bind(this)()
             } else {
-                drawPath(path, id)
+                drawPath.bind(this)(path)
             }
             source = undefined
             destination = undefined
@@ -454,8 +438,8 @@ function initializeControlBox(id, width, height, nodes) {
     controlBox.append(clearButton)
     clearButton.className = 'navigateButton'
     clearButton.append(document.createTextNode('Clear'))
-    clearButton.addEventListener('click', function(e) {
-        clearNavigation(width, height, nodes, id)
+    clearButton.addEventListener('click', () => {
+        clearNavigation.bind(this)()
     })
 
     // add to the document
@@ -463,20 +447,22 @@ function initializeControlBox(id, width, height, nodes) {
 }
 
 /* function to set up the grid of nodes */
-function initializeNodes(width, height, nodes, id) {
-    const nodesContainer = document.getElementById(id + '.nodes')
+function initializeNodes() {
+    const nodesContainer = document.getElementById(this.id + '.nodes')
 
     // initialize a 2D grid of nodes
-    for (let i = 0; i < width; i++) {
+    for (let i = 0; i < this.width; i++) {
         const column = document.createElement('ul')
-        nodes[i] = []
-        for (let j = 0; j < height; j++) {
+        this.nodes[i] = []
+        for (let j = 0; j < this.height; j++) {
             const node = document.createElement('div')
             const item = document.createElement('li')
             node.style.left = i * 50 + 50 + 'px'
             node.style.top = j * 50 + 50 + 'px'
-            node.id = id + '.sn.' + i + '.' + j
-            nodes[i][j] = {
+            node.id = this.id + '.sn.' + i + '.' + j
+            node.classList.add('node')
+            node.classList.add('invisibleIntersection')
+            this.nodes[i][j] = {
                 id: node.id,
                 neighbours: [],     // these fields are used for BFS
                 parent: null,
@@ -484,16 +470,28 @@ function initializeNodes(width, height, nodes, id) {
                 x: i,
                 y: j
             }
+            
             item.appendChild(node)
             column.appendChild(item)
+            node.addEventListener('click', () => {
+                if (state === 'selectSrc') {
+                    const srcLabel = document.getElementById(this.id + '.srcLabel')
+                    source = this.nodes[i][j]
+                    srcLabel.textContent = 'Source: unknown intersection'
+                } else if (state === 'selectDest') {
+                    const destLabel = document.getElementById(this.id + '.destLabel')
+                    destination = this.nodes[i][j]
+                    destLabel.textContent = 'Destination: unknown intersection'
+                }
+            })
         }
         nodesContainer.append(column)
     }
 }
 
 /* function to add a connection between two nodes */
-function addConnection(x1, y1, x2, y2, nodes, id) {
-    const connectionsContainer = document.getElementById(id + '.connectionsContainer')
+function addConnection(x1, y1, x2, y2) {
+    const connectionsContainer = document.getElementById(this.id + '.connectionsContainer')
     const line = document.createElement('div')
     line.classList.add('line')
     line.classList.add('connection')
@@ -502,37 +500,37 @@ function addConnection(x1, y1, x2, y2, nodes, id) {
     let width = 5;
     if (x1 !== x2) {
         width = ((x2 - x1) * 50)
-        document.getElementById(nodes[x1][y1].id).classList.add('node')
-        document.getElementById(nodes[x2][y1].id).classList.add('node')
-        document.getElementById(nodes[x1][y1].id).classList.add('intersection')
-        document.getElementById(nodes[x2][y1].id).classList.add('intersection')
+        document.getElementById(this.nodes[x1][y1].id).classList.add('node')
+        document.getElementById(this.nodes[x2][y1].id).classList.add('node')
+        document.getElementById(this.nodes[x1][y1].id).classList.add('intersection')
+        document.getElementById(this.nodes[x2][y1].id).classList.add('intersection')
     }
     
     // determine the height of the connection line
     let height = 5;
     if (y1 !== y2) {
         height = ((y2 - y1) * 50)
-        document.getElementById(nodes[x1][y1].id).classList.add('node')
-        document.getElementById(nodes[x1][y2].id).classList.add('node')
-        document.getElementById(nodes[x1][y1].id).classList.add('intersection')
-        document.getElementById(nodes[x1][y2].id).classList.add('intersection')
+        document.getElementById(this.nodes[x1][y1].id).classList.add('node')
+        document.getElementById(this.nodes[x1][y2].id).classList.add('node')
+        document.getElementById(this.nodes[x1][y1].id).classList.add('intersection')
+        document.getElementById(this.nodes[x1][y2].id).classList.add('intersection')
     }
 
     // update neighbours
     for (let i = x1; i <= x2; i++) {
         if (i > 0) {
-            nodes[i][y1].neighbours.push(nodes[i-1][y1])
+            this.nodes[i][y1].neighbours.push(this.nodes[i-1][y1])
         }
         if (i < x2) {
-            nodes[i][y1].neighbours.push(nodes[i+1][y1])
+            this.nodes[i][y1].neighbours.push(this.nodes[i+1][y1])
         }
     }
     for (let i = y1; i <= y2; i++) {
         if (i > 0) {
-            nodes[x1][i].neighbours.push(nodes[x1][i-1])
+            this.nodes[x1][i].neighbours.push(this.nodes[x1][i-1])
         }
         if (i < y2) {
-            nodes[x1][i].neighbours.push(nodes[x1][i+1])
+            this.nodes[x1][i].neighbours.push(this.nodes[x1][i+1])
         }
     }
 
@@ -545,10 +543,10 @@ function addConnection(x1, y1, x2, y2, nodes, id) {
 }
 
 /* function to add a block place to the map (i.e., a place that fits between streets) */
-function createBlockPlace(blockPlace, id, labelSpots) {
-    const blockPlacesContainer = document.getElementById(id + '.blockPlacesContainer')
+function createBlockPlace(blockPlace) {
+    const blockPlacesContainer = document.getElementById(this.id + '.blockPlacesContainer')
     const block = document.createElement('div')
-    block.id = blockPlace.getID(id)
+    block.id = blockPlace.getID(this.id)
     block.classList.add('block')
     block.classList.add(blockPlace.class)
     block.style.width = (blockPlace.width * 50 - 5) + 'px'
@@ -566,7 +564,7 @@ function createBlockPlace(blockPlace, id, labelSpots) {
     // look for free place to put the label
     let tmp_x = blockPlace.x
     let tmp_y = blockPlace.y
-    while (labelSpots.includes(tmp_x + '.' + tmp_y) && tmp_y <= blockPlace.height) {
+    while (this.labelSpots.includes(tmp_x + '.' + tmp_y) && tmp_y <= blockPlace.height) {
         if (tmp_x - blockPlace.x >= blockPlace.width) {
             tmp_y++
             tmp_x = blockPlace.x
@@ -574,25 +572,35 @@ function createBlockPlace(blockPlace, id, labelSpots) {
             tmp_x++
         }
     }
-    labelSpots.push(tmp_x + '.' + tmp_y)
+    this.labelSpots.push(tmp_x + '.' + tmp_y)
     label.style.left = 50 * (tmp_x - blockPlace.x) + 'px'
     label.style.top = 50 * (tmp_y - blockPlace.y)+ 'px'
 
     // when the place is clicked, display its information
-    block.addEventListener('click', function(e) {
+    block.addEventListener('click', () => {
         try {
-            const infoLabel = document.getElementById(id + '.selectedLabel')
-            const descriptionLabel = document.getElementById(id + '.descLabel')
-            infoLabel.textContent = blockPlace.name
-            descriptionLabel.textContent = blockPlace.description
-            current = blockPlace
+            if (state === 'view') {
+                const infoLabel = document.getElementById(this.id + '.selectedLabel')
+                const descriptionLabel = document.getElementById(this.id + '.descLabel')
+                infoLabel.textContent = blockPlace.name
+                descriptionLabel.textContent = blockPlace.description
+                current = blockPlace
+            } else if (state === 'selectSrc') {
+                const srcLabel = document.getElementById(this.id + '.srcLabel')
+                source = blockPlace
+                srcLabel.textContent = 'Source: ' + blockPlace.name
+            } else if (state === 'selectDest') {
+                const destLabel = document.getElementById(this.id + '.destLabel')
+                destination = blockPlace
+                destLabel.textContent = 'Destination: ' + blockPlace.name
+            }
         } catch (error) {
             if (DEBUG) console.log('skipping updating info box -- info box not initialized.')
         }
     })
 
     // when the place is hover over-ed, make the text bold
-    const element = document.getElementById(blockPlace.getID(id))
+    const element = document.getElementById(blockPlace.getID(this.id))
     block.addEventListener('mouseover', function(e) {
         element.classList.add('hoverOver')
     })
@@ -602,10 +610,10 @@ function createBlockPlace(blockPlace, id, labelSpots) {
 }
 
 /* function to add a line place to the map (i.e., a place that fits on a connection) */
-function createLinePlace(linePlace, id, labelSpots) {
-    const linePlacesContainer = document.getElementById(id + '.linePlacesContainer')
+function createLinePlace(linePlace) {
+    const linePlacesContainer = document.getElementById(this.id + '.linePlacesContainer')
     const line = document.createElement('div')
-    line.id = linePlace.getID(id)
+    line.id = linePlace.getID(this.id)
     line.classList.add('line')
     line.classList.add(linePlace.class)
 
@@ -635,11 +643,11 @@ function createLinePlace(linePlace, id, labelSpots) {
     line.append(label)
 
     // look for free place to put the label
-    const coordinates = searchPreliminaryLocations(linePlace.x1, linePlace.x2, labelSpots)
+    const coordinates = searchPreliminaryLocations.bind(this)(linePlace.x1, linePlace.x2)
     let tmp_x = linePlace.x1
     let tmp_y = linePlace.x2
     if (coordinates === null) {
-        while (labelSpots.includes(tmp_x + '.' + tmp_y) && tmp_y <= (linePlace.y2 - linePlace.y1)) {
+        while (this.labelSpots.includes(tmp_x + '.' + tmp_y) && tmp_y <= (linePlace.y2 - linePlace.y1)) {
             if (tmp_x - linePlace.x1 >= linePlace.x2 - linePlace.x1) {
                 tmp_y++
                 tmp_x = linePlace.x1
@@ -652,25 +660,27 @@ function createLinePlace(linePlace, id, labelSpots) {
         tmp_y = coordinates[1]
     }
 
-    labelSpots.push(tmp_x + '.' + tmp_y)
+    this.labelSpots.push(tmp_x + '.' + tmp_y)
     label.style.left = (tmp_x - linePlace.x1) + 'px'
     label.style.top = (tmp_y - linePlace.y1) + 'px'
     
     // when the place is clicked, display its information
-    line.addEventListener('click', function(e) {
+    line.addEventListener('click', () => {
         try {
-            const infoLabel = document.getElementById(id + '.selectedLabel')
-            const descriptionLabel = document.getElementById(id + '.descLabel')
-            infoLabel.textContent = linePlace.name
-            descriptionLabel.textContent = linePlace.description
-            current = linePlace
+            if (state === 'view') {
+                const infoLabel = document.getElementById(this.id + '.selectedLabel')
+                const descriptionLabel = document.getElementById(this.id + '.descLabel')
+                infoLabel.textContent = linePlace.name
+                descriptionLabel.textContent = linePlace.description
+                current = linePlace
+            }
         } catch (error) {
             if (DEBUG) console.log('skipping updating info box -- info box not initialized.')
         }
     })
 
     // when the place is hover over-ed, make the text bold
-    const element = document.getElementById(linePlace.getID(id))
+    const element = document.getElementById(linePlace.getID(this.id))
     line.addEventListener('mouseover', function(e) {
         element.classList.add('hoverOver')
     })
@@ -680,10 +690,10 @@ function createLinePlace(linePlace, id, labelSpots) {
 }
 
 /* function to add a node place to the map (i.e., a place that falls on a node) */
-function createNodePlace(nodePlace, id, labelSpots) {
-    const nodePlacesContainer = document.getElementById(id + '.nodePlacesContainer')
+function createNodePlace(nodePlace) {
+    const nodePlacesContainer = document.getElementById(this.id + '.nodePlacesContainer')
     const node = document.createElement('div')
-    node.id = nodePlace.getID(id)
+    node.id = nodePlace.getID(this.id)
     node.className = nodePlace.class
 
     // determine placement
@@ -700,28 +710,38 @@ function createNodePlace(nodePlace, id, labelSpots) {
     node.append(label)
 
     // look for free place to put the label
-    const coordinates = searchPreliminaryLocations(nodePlace.x, nodePlace.y, labelSpots)
+    const coordinates = searchPreliminaryLocations.bind(this)(nodePlace.x, nodePlace.y)
     let tmp_x = coordinates[0]
     let tmp_y = coordinates[1]
-    labelSpots.push(tmp_x + '.' + tmp_y)
+    this.labelSpots.push(tmp_x + '.' + tmp_y)
     label.style.left = (tmp_x - nodePlace.x) * 50 + 'px'
     label.style.top = (tmp_y - nodePlace.y) * 50 + 'px'
 
     // when the place is clicked, display its information
-    node.addEventListener('click', function(e) {
+    node.addEventListener('click', () => {
         try {
-            const infoLabel = document.getElementById(id + '.selectedLabel')
-            const descriptionLabel = document.getElementById(id + '.descLabel')
-            infoLabel.textContent = nodePlace.name
-            descriptionLabel.textContent = nodePlace.description
-            current = nodePlace
+            if (state === 'view') {
+                const infoLabel = document.getElementById(this.id + '.selectedLabel')
+                const descriptionLabel = document.getElementById(this.id + '.descLabel')
+                infoLabel.textContent = nodePlace.name
+                descriptionLabel.textContent = nodePlace.description
+                current = nodePlace
+            } else if (state === 'selectSrc') {
+                const srcLabel = document.getElementById(this.id + '.srcLabel')
+                source = nodePlace
+                srcLabel.textContent = 'Source: ' + nodePlace.name
+            } else if (state === 'selectDest') {
+                const destLabel = document.getElementById(this.id + '.destLabel')
+                destination = nodePlace
+                destLabel.textContent = 'Destination: ' + nodePlace.name
+            }
         } catch (error) {
             if (DEBUG) console.log('skipping updating info box -- info box not initialized.')
         }
     })
 
     // when the place is hover over-ed, make the text bold
-    const element = document.getElementById(nodePlace.getID(id))
+    const element = document.getElementById(nodePlace.getID(this.id))
     node.addEventListener('mouseover', function(e) {
         element.classList.add('hoverOver')
     })
@@ -741,8 +761,8 @@ function toggleHighlightBlockPlace(id) {
 }
 
 /* function to add a legend to the map */
-function addLegend(blocks, lines, nodes, id) {
-    const controlCentre = document.getElementById(id + '.controlCentre')
+function addLegend(blocks, lines, nodes) {
+    const controlCentre = document.getElementById(this.id + '.controlCentre')
     const legend = document.createElement('div')
     legend.className = 'controlBox'
     controlCentre.append(legend)
@@ -772,7 +792,7 @@ function addLegend(blocks, lines, nodes, id) {
         const icon = document.createElement('div')
         icon.classList.add(type + 'Icon')
         icon.classList.add(element)
-        icon.id = id + '.' + type + '.' + element
+        icon.id = this.id + '.' + type + '.' + element
         iconCell.append(icon)
         list.append(row)
 
@@ -798,8 +818,8 @@ function addLegend(blocks, lines, nodes, id) {
 }
 
 /* function to add a menu to filter places by type */
-function addFilterBox(options, title, description, places, elementGetter, id) {
-    const controlCentre = document.getElementById(id + '.controlCentre')
+function addFilterBox(options, title, description, places, elementGetter) {
+    const controlCentre = document.getElementById(this.id + '.controlCentre')
     const filterBox = document.createElement('div')
     filterBox.className = 'controlBox'
     controlCentre.append(filterBox)
@@ -822,7 +842,7 @@ function addFilterBox(options, title, description, places, elementGetter, id) {
         
         // add a check box
         const checkBox = document.createElement('input')
-        checkBox.id = id + '.fb.' + element
+        checkBox.id = this.id + '.fb.' + element
         checkBox.type = 'checkbox'
 
         // add a label
@@ -834,10 +854,10 @@ function addFilterBox(options, title, description, places, elementGetter, id) {
         item.append(label)
         
         list.append(item)
-        const elements = elementGetter(element, places, id)
+        const elements = elementGetter.bind(this)(element, places)
 
         // when a place name is clicked, highlight it on the map
-        checkBox.addEventListener('click', function(e) {
+        checkBox.addEventListener('click', () => {
             elements.map((id) => {
                 toggleHighlightBlockPlace(id)
             })
@@ -846,11 +866,11 @@ function addFilterBox(options, title, description, places, elementGetter, id) {
 }
 
 /* function to draw a path between two nodes on the map */
-function drawPath(path, id) {
+function drawPath(path) {
     // draw source
-    const navigationContainer = document.getElementById(id + '.navigationContainer')
+    const navigationContainer = document.getElementById(this.id + '.navigationContainer')
     const source = document.createElement('div')
-    source.id = id + 'source'
+    source.id = this.id + 'source'
     source.style.left = path[0].x * 50 + 50 + 'px'
     source.style.top = path[0].y * 50 + 50 + 'px'
     source.classList.add('node')
@@ -860,7 +880,7 @@ function drawPath(path, id) {
 
     // draw destination
     const dest = document.createElement('div')
-    dest.id = id + 'dest'
+    dest.id = this.id + 'dest'
     dest.style.left = path[path.length-1].x * 50 + 50 + 'px'
     dest.style.top = path[path.length-1].y * 50 + 50 + 'px'
     dest.classList.add('node')

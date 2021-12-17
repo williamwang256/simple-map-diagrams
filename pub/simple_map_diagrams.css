@@ -86,9 +86,16 @@ button {
     background-color: orangered;
 }
 
+.invisibleIntersection {
+    border: 3px solid white;
+    background-color: white;
+    opacity: 0;
+}
+
 .intersection {
     border: 3px solid darkgray;
     background-color: grey;
+    opacity: 1;
 }
 
 .navigationEndPoint {

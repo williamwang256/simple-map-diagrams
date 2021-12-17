@@ -2,17 +2,6 @@
 
 "use strict";
 
-// Example information
-const e1_title = document.createElement('h1')
-e1_title.append(document.createTextNode('Example #1. Campus Map'))
-const e1_description = document.createElement('p')
-e1_description.append(document.createTextNode(
-    'Sample use case of the Simple Map Diagrams library on a University\'s website, showing an interactive campus map. \
-    Streets are arranged in a grid, and different types of places, such as parks, buildings, roads, and events are located across the map.'
-))
-document.getElementById('example1').append(e1_title)
-document.getElementById('example1').append(e1_description)
-
 // initialization
 const e1_smd = new SimpleMapDiagram(10, 5, 'example1')
 e1_smd.setUp('Main Campus Map', 'This is a sample use case of the Simple Map Diagrams library, demonstrating a campus map.')
@@ -53,6 +42,3 @@ e1_smd.addNodePlace(6, 4, 'Road closure', 'incident', 'Construction ongoing. Ple
 
 // use the default set up
 e1_smd.defaultSetUp()
-
-
-document.getElementById('example1').append(document.createElement('hr'))

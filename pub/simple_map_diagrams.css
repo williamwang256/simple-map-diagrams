@@ -1,8 +1,8 @@
-ul li {
+.SMDlist{
     list-style: none;
 }
 
-button {
+.SMDbutton {
   background-color: #e7e7e7;
   border: none;
   color: black;
@@ -16,7 +16,12 @@ button {
   font-weight: bold;
 }
 
-select {
+.submitButton {
+    background-color: #888888;
+    color: white;
+}
+
+.SMDselect {
     background-color: #e7e7e7;
     border: none;
     color: black;
@@ -28,7 +33,15 @@ select {
     border-radius: 5px;
     box-shadow: 0 0 10px #e7e7e7;
     font-weight: bold;
-  }
+}
+
+.mapButton {
+    width: 60px;
+    height: 20px;
+    margin: 10px;
+    font-size: 10px;
+    padding: 2px;
+}
 
 /* lines css */
 
@@ -117,13 +130,6 @@ select {
     background-color: #669df6;
     box-shadow: 0 0 10px #669df6    ;
 }
-
-/* shadow on mouseover for all added places*/
-/*.poi:hover, .street:hover, .park:hover, 
-.building:hover, .water:hover, .transitLine:hover, 
-.specialEvent:hover, .incident:hover {
-    box-shadow: 0 0 10px #888888;
-}*/
 
 /* containers css */
 
@@ -214,20 +220,4 @@ select {
     width: 10px; 
     height: 10px; 
     border-radius: 50%; 
-}
-
-
-
-
-
-.navigateButton {
-    margin: 10px;
-}
-
-.mapButton {
-    width: 60px;
-    height: 20px;
-    margin: 10px;
-    font-size: 10px;
-    padding: 2px;
 }

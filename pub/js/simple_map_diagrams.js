@@ -89,7 +89,7 @@
          * API function to add a block place to the map. 
          * Note: type must match one of the pre-defined types in the CSS file.
          * 
-         * Input: the x-y coordinates, width and heigh, name, title, and description of the place.
+         * Input: the x-y coordinates, width and height, name, title, and description of the place.
          */
         addBlockPlace: function(x, y, width, height, name, type, description) {
             const blockPlace = new BlockPlace(x, y, width, height, name, type, description)
@@ -122,33 +122,6 @@
         },
 
         /***
-         * API function to highlight all places on the map with a given class.
-         * 
-         * Input: the class/type of the place(s).
-         */
-        highlightAllByType: function(type) {
-            this.blockPlaces.map((element) => {
-                if (element.class === type) {
-                    toggleHighlightBlockPlace(element.getID(this.id), this.id)
-                }
-            })
-        },
-
-        /***
-         * API function to highlight all places on the map with a given name.
-         * 
-         * Input: the name of the place(s).
-         */
-        highlightAllByName: function(name) {
-            // if no options are given, default to include all
-            this.blockPlaces.map((element) => {
-                if (element.name === name) {
-                    toggleHighlightBlockPlace(element.getID(this.id), this.id)
-                }
-            })
-        },
-
-        /***
          * API function to add a box to the map to display information about places.
          */
         addInfoBox: function() {
@@ -169,13 +142,13 @@
          * 
          * Input: the options to be included. If none are given, default to including all.
          */
-        addFilterByClassBox: function(title, description, options) {
+        addFilterByClassBox: function(options) {
             const all_places = this.blockPlaces.concat(this.linePlaces).concat(this.nodePlaces)
             // if no options are given, default to include all
             if (!options) {
                 options = getAllItemClasses(all_places)
             }
-            addFilterMenu.bind(this)(options, title, description, all_places, getAllPlacesByClass)
+            addFilterMenu.bind(this)(options, 'Filter items by type:', all_places, getAllPlacesByClass)
         },
 
         /***
@@ -184,13 +157,13 @@
          * 
          * Input: the options to be included. If none are given, default to including all.
          */
-        addFilterByNameBox: function(title, description, options) {
+        addFilterByNameBox: function(options) {
             const all_places = this.blockPlaces.concat(this.linePlaces).concat(this.nodePlaces)
             // if no options are given, default to include all
             if (!options) {
                 options = getAllItemNames(all_places)
             }
-            addFilterMenu.bind(this)(options, title, description, all_places, getPlaceByName)
+            addFilterMenu.bind(this)(options, 'Filter items by name:', description, all_places, getPlaceByName)
         },
 
         /***
@@ -436,7 +409,7 @@
         const titleContainer = document.createElement('div')
         const titleElement = document.createElement('h2')
         titleElement.append(document.createTextNode(title))
-        const subtitle = document.createElement('p')
+        const subtitle = document.createElement('label')
         subtitle.className = 'controlLabel'
         subtitle.append(document.createTextNode(description))
         titleContainer.id = this.id + '.titleContainer'
@@ -461,9 +434,10 @@
 
         // create some buttons on the map (clear all button, etc.)
         const clearButton = document.createElement('button')
+        clearButton.classList.add('SMDbutton')
         clearButton.append(document.createTextNode('Clear all'))
         mapContainer.append(clearButton)
-        clearButton.className = 'mapButton'
+        clearButton.classList.add('mapButton')
         clearButton.addEventListener('click', () => {
             clearAllHighlights.bind(this)()
             clearNavigation.bind(this)()
@@ -516,7 +490,7 @@
         const infoLabel = document.createElement('h4')
         infoLabel.id = this.id + '.selectedLabel'
         infoLabel.append(document.createTextNode('Click an item to start.'))
-        const descriptionLabel = document.createElement('p')
+        const descriptionLabel = document.createElement('label')
         descriptionLabel.id = this.id + '.descLabel'
         descriptionLabel.className = 'controlLabel'
         controlBox.append(infoLabel)
@@ -538,6 +512,7 @@
         const navLabel = document.createElement('h4')
         navLabel.append(document.createTextNode('Navigation'))
         const list = document.createElement('ul')
+        list.className = 'SMDlist'
         const srcLabel = document.createElement('li')
         srcLabel.id = this.id + '.srcLabel'
         srcLabel.className = 'controlLabel'
@@ -553,23 +528,24 @@
 
         // button to mark the source
         const srcButton = document.createElement('button')
+        srcButton.classList.add('SMDbutton')
         navigationBox.append(srcButton)
-        srcButton.className = 'navigateButton'
         srcButton.append(document.createTextNode('Choose starting point'))
         srcButton.addEventListener('click', () => { _state = 'selectSrc' })
 
         // button to mark the destination
         const destButton = document.createElement('button')
+        destButton.classList.add('SMDbutton')
         navigationBox.append(destButton)
-        destButton.className = 'navigateButton'
         destButton.append(document.createTextNode('Choose destination'))
         destButton.addEventListener('click', () => { _state = 'selectDest' })
 
         // button to display navigation on screen
         const navigateButton = document.createElement('button')
+        navigateButton.classList.add('SMDbutton')
         navigationBox.append(navigateButton)
-        navigateButton.className = 'navigateButton'
         navigateButton.append(document.createTextNode('Navigate!'))
+        navigateButton.classList.add('submitButton')
         navigateButton.addEventListener('click', () => {
             clearNavigation.bind(this)()
             if (_source === undefined || _destination === undefined) {
@@ -606,6 +582,7 @@
         // initialize a 2D grid of nodes, organized using unordered lists
         for (let i = 0; i < this.width; i++) {
             const column = document.createElement('ul')
+            column.className = 'SMDlist'
             this.nodes[i] = []
             for (let j = 0; j < this.height; j++) {
                 const node = document.createElement('div')
@@ -629,11 +606,11 @@
                     if (_state === 'selectSrc') {
                         const srcLabel = document.getElementById(this.id + '.srcLabel')
                         _source = this.nodes[i][j]
-                        srcLabel.textContent = 'Source: unknown intersection'
+                        srcLabel.textContent = 'Source: unnamed intersection'
                     } else if (_state === 'selectDest') {
                         const destLabel = document.getElementById(this.id + '.destLabel')
                         _destination = this.nodes[i][j]
-                        destLabel.textContent = 'Destination: unknown intersection'
+                        destLabel.textContent = 'Destination: unnamed intersection'
                     }
                 })
             }
@@ -997,7 +974,7 @@
     /***
      * DOM manipulation function to add a menu to filter all places by type.
      */
-    function addFilterMenu(options, title, description, places, elementGetter) {
+    function addFilterMenu(options, title, places, elementGetter) {
         const controlCentre = document.getElementById(this.id + '.controlCentre')
         const filterBox = document.createElement('div')
         filterBox.className = 'controlBox'
@@ -1006,14 +983,11 @@
         // add a title
         const label = document.createElement('h3')
         label.append(document.createTextNode(title))
-        const instruction = document.createElement('p')
-        instruction.className = 'controlLabel'
-        instruction.append(document.createTextNode(description))
         filterBox.append(label)
-        filterBox.append(instruction)
 
         // add a select box
         const list = document.createElement('select')
+        list.className = 'SMDselect'
         filterBox.append(list)
         options.map((element) => {
             const item = document.createElement('option')
@@ -1022,6 +996,8 @@
             list.append(item)
         })
         const submitButton = document.createElement('button')
+        submitButton.classList.add('SMDbutton')
+        submitButton.classList.add('submitButton')
         submitButton.append(document.createTextNode('OK'))
         submitButton.addEventListener('click', () => {
             const elements = elementGetter.bind(this)(list.value, places)

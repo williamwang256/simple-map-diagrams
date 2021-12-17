@@ -1,6 +1,30 @@
 
 body {
-	margin:0; font-family: Futura, sans-serif; height: 100%;
+	margin:0; 
+	font-family: Futura, sans-serif; 
+	height: 100%;
+}
+
+hr {
+	margin-top: 50px;
+	margin-bottom: 50px;
+}
+
+p {
+	font-family: Georgia, 'Times New Roman', Times, serif, sans-serif;
+}
+
+.container {
+	margin-left: 50px;
+	padding: 20px;
+}
+
+code {
+
+	font-weight: bold;
+
+	color: #669df6;
+
 }
 
 #topNavBar {
@@ -45,5 +69,5 @@ body {
 
 .subHeaderText {
 	margin: 5px 10px;
-	color: #aaaaaa;
+	color: #669df6;
 }

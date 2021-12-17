@@ -13,6 +13,11 @@ ul li {
     background-color: #888888;
 }
 
+.path {
+    background-color: #669df6;
+    box-shadow: 0 0 10px #669df6    ;
+}
+
 .street {
     background-color: black;
 }

@@ -115,6 +115,12 @@ SimpleMapDiagram.prototype = {
     addLegend: function() {
         addLegend(getAllItemClasses(this.blockPlaces), 
             getAllItemClasses(this.linePlaces), getAllItemClasses(this.nodePlaces), this.id)
+    },
+
+    /* draw a path between two specified nodes on the graph, if possible */
+    navigate: function(x1, y1, x2, y2) {
+        const path = findShortestPath(x1, y1, x2, y2, this.width, this.height, this.nodes)
+        drawPath(path, this.id)
     }
 }
 
@@ -237,6 +243,39 @@ function searchPreliminaryLocations(x, y, labelSpots) {
     return [tmp_x, tmp_y]
 }
 
+/* function to find a path between two locations, using Breadth First Search */
+function findShortestPath(x1, y1, x2, y2, width, height, nodes) {
+    for (let i = 0; i < width; i++) {
+        for (let j = 0; j < height; j++) {
+            nodes[i][j].visited = false
+            nodes[i][j].parent = null
+        }
+    }
+    nodes[x1][y1].visited = true
+    const queue = []
+    queue.push(nodes[x1][y1])
+    while (queue.length !== 0) {
+        u = queue.shift()
+        if (u === nodes[x2][y2]) {
+            let curr = u
+            const ret = []
+            while (curr !== null) {
+                ret.push(curr)
+                curr = curr.parent
+            }
+            console.log(ret)
+            return ret
+        }
+        for (let i = 0; i < u.neighbours.length; i++) {
+            if (u.neighbours[i].visited === false) {
+                u.neighbours[i].visited = true
+                u.neighbours[i].parent = u
+                queue.push(u.neighbours[i])
+            }
+        }
+    }
+}
+
 /*** DOM manipulation functions ***/
 
 /* function to set up the map */
@@ -251,7 +290,7 @@ function mapSetUp(width, height, title, description, id) {
 
     // create a title and subtitle
     const titleContainer = document.createElement('div')
-    const titleElement = document.createElement('h3')
+    const titleElement = document.createElement('h2')
     titleElement.append(document.createTextNode(title))
     const subtitle = document.createElement('p')
     subtitle.className = 'controlLabel'
@@ -267,8 +306,6 @@ function mapSetUp(width, height, title, description, id) {
     mapContainer.id = id + '.mapContainer'
     mapContainer.className = 'controlContainer'
     container.append(mapContainer)
-
-
 
     const map = document.createElement('div')
     map.id = id + '.map'
@@ -309,12 +346,12 @@ function mapSetUp(width, height, title, description, id) {
 
 /* function to set up the info box */
 function initializeControlBox(id) {
-    const controlCentre = document.getElementById(id + '.controlCentre')
+    const mapContainer = document.getElementById(id + '.mapContainer')
     const controlBox = document.createElement('div')
     controlBox.className = 'controlBox'
 
     // labels to display information
-    const infoLabel = document.createElement('h3')
+    const infoLabel = document.createElement('h4')
     infoLabel.id = id + '.selectedLabel'
     infoLabel.append(document.createTextNode('Click an item to start.'))
     const descriptionLabel = document.createElement('p')
@@ -326,7 +363,7 @@ function initializeControlBox(id) {
     infoLabel.append(document.createTextNode(''))
 
     // add to the document
-    controlCentre.append(controlBox)
+    mapContainer.append(controlBox)
 }
 
 /* function to set up the grid of nodes */
@@ -345,7 +382,11 @@ function initializeNodes(width, height, nodes, id) {
             node.id = id + '.sn.' + i + '.' + j
             nodes[i][j] = {
                 id: node.id,
-                neighbours: []
+                neighbours: [],     // these fields are used for BFS
+                parent: null,
+                visited: false,
+                x: i,
+                y: j
             }
             item.appendChild(node)
             column.appendChild(item)
@@ -384,18 +425,22 @@ function addConnection(x1, y1, x2, y2, nodes, id) {
     // update neighbours
     for (let i = x1; i <= x2; i++) {
         if (i > 0) {
-            nodes[i][y1].neighbours.push(parseInt(i-1) + '.' + parseInt(y1))
+            // nodes[i][y1].neighbours.push(parseInt(i-1) + '.' + parseInt(y1))
+            nodes[i][y1].neighbours.push(nodes[i-1][y1])
         }
         if (i < x2) {
-            nodes[i][y1].neighbours.push(parseInt(i+1) + '.' + parseInt(y1))
+            //nodes[i][y1].neighbours.push(parseInt(i+1) + '.' + parseInt(y1))
+            nodes[i][y1].neighbours.push(nodes[i+1][y1])
         }
     }
     for (let i = y1; i <= y2; i++) {
         if (i > 0) {
-            nodes[x1][i].neighbours.push(parseInt(x1) + '.' + parseInt(i-1))
+            // nodes[x1][i].neighbours.push(parseInt(x1) + '.' + parseInt(i-1))
+            nodes[x1][i].neighbours.push(nodes[x1][i-1])
         }
         if (i < y2) {
-            nodes[x1][i].neighbours.push(parseInt(x1) + '.' + parseInt(i+1))
+            // nodes[x1][i].neighbours.push(parseInt(x1) + '.' + parseInt(i+1))
+            nodes[x1][i].neighbours.push(nodes[x1][i+1])
         }
     }
 
@@ -703,4 +748,40 @@ function addFilterBox(options, title, description, places, elementGetter, id) {
             })
         })
     })
+}
+
+/* function to draw a path between two nodes on the map */
+function drawPath(path, id) {
+    for (let i = 1; i < path.length; i++) {
+
+        const x1 = path[i - 1].x
+        const y1 = path[i - 1].y
+        const x2 = path[i].x
+        const y2 = path[i].y
+
+        const connectionsContainer = document.getElementById(id + '.connectionsContainer')
+        const line = document.createElement('div')
+        line.classList.add('line')
+        line.classList.add('path')
+
+        // determine the width of the connection line
+        let width = 7;
+        if (x1 !== x2) {
+            width = (Math.abs(x2 - x1) * 50)
+        }
+        
+        // determine the height of the connection line
+        let height = 7;
+        if (y1 !== y2) {
+            height = (Math.abs(y2 - y1) * 50)
+        }
+
+        // create the element
+        line.style.width = width + 'px'
+        line.style.height = height + 'px'
+        line.style.left = (50 * (Math.min(x1, x2) + 1) + 5) + 'px'
+        line.style.top = (50 * (Math.min(y1, y2) + 1) + 5) + 'px'
+        line.style.zIndex = 4
+        connectionsContainer.append(line)
+    }
 }

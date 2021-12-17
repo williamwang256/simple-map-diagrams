@@ -93,7 +93,8 @@ SimpleMapDiagram.prototype = {
 
     /* add an information box to display place information */
     addInfoBox: function() {
-        initializeControlBox.bind(this)()
+        initializeInfoBox.bind(this)()
+        initializeNavigationMenu.bind(this)()
     },
 
     /* add a filter box which will give users the option to filter by certain place type */
@@ -103,7 +104,7 @@ SimpleMapDiagram.prototype = {
         if (!options) {
             options = getAllItemClasses(all_places)
         }
-        addFilterBox.bind(this)(options, title, description, all_places, getAllPlacesByClass)
+        addFilterMenu.bind(this)(options, title, description, all_places, getAllPlacesByClass)
     },
 
     /* add a filter box which will give users the option to filter by certain place type */
@@ -113,7 +114,7 @@ SimpleMapDiagram.prototype = {
         if (!options) {
             options = getAllItemNames(all_places)
         }
-        addFilterBox.bind(this)(options, title, description, all_places, getPlaceByName)
+        addFilterMenu.bind(this)(options, title, description, all_places, getPlaceByName)
     },
 
     /* add a legend to the map */
@@ -125,7 +126,9 @@ SimpleMapDiagram.prototype = {
 
 /*** Classes for place objects ***/
 
-/* block place class */
+/***
+ * A class representing a block place.
+ */
 class BlockPlace {
 	constructor(x, y, width, height, name, type, description) {
 		this.x = x
@@ -137,13 +140,17 @@ class BlockPlace {
         this.description = description
     }
 
-    /* get the id of this place, given its SMD id*/
+    /***
+     * Gets the id of this place, given its SMD id
+     */
 	getID(id) {
         return id + '.b.' + this.x + '.' + this.y
     }
 }
 
-/* line place class */
+/***
+ * A class representing a line place.
+ */
 class LinePlace {
 	constructor(x1, y1, x2, y2, name, type, description) {
 		this.x1 = x1
@@ -155,13 +162,17 @@ class LinePlace {
         this.description = description
 	}
 
-    /* get the id of this place, given its SMD id*/
+    /***
+     * Gets the id of this place, given its SMD id
+     */
 	getID(id) {
         return id + '.l.' + this.x1 + '.' + this.y1 + '.' + this.x2 + '.' + this.y2
     }
 }
 
-/* node place class */
+/***
+ * A class representing a node place.
+ */
 class NodePlace {
 	constructor(x, y, name, type, description) {
 		this.x = x
@@ -171,7 +182,9 @@ class NodePlace {
         this.description = description
 	}
 
-    /* get the id of this place, given its SMD id*/
+    /***
+     * Gets the id of this place, given its SMD id
+     */
 	getID(id) {
         return id + '.n.' + this.x + '.' + this.y
     }
@@ -179,7 +192,12 @@ class NodePlace {
 
 /*** Helper functions ***/
 
-/* return a list of all places of a certain class */
+/***
+ * Function to return a list of all places of a certain class. 
+ * 
+ * Input: the class of elements to get, and a list of elements to filter from.
+ * Returns: a list of ids of elements.
+ */
 function getAllPlacesByClass(type, elements) {
     const list = []
     elements.map((element) => {
@@ -190,7 +208,12 @@ function getAllPlacesByClass(type, elements) {
     return list
 }
 
-/* get a certain place */
+/***
+ * Function to get a list of all elements with a given name.
+ * 
+ * Input: the name of the element to get, and a list of elements to filter from.
+ * Returns: a list of ids of elements.
+ */
 function getPlaceByName(name, elements) {
     const list = []
     elements.map((element) => {
@@ -201,7 +224,12 @@ function getPlaceByName(name, elements) {
     return list
 }
 
-/* function to get a list of all place classes on the map */
+/***
+ * Function to get a list of all place classes present on the map.
+ * 
+ * Input: a list of elements to filter from.
+ * Returns: a list of classes.
+ */
 function getAllItemClasses(elements) {
     const list = []
     elements.map((element) => {
@@ -212,7 +240,12 @@ function getAllItemClasses(elements) {
     return list
 }
 
-/* function to get a list of all names of places on the map */
+/***
+ * Function to get a list of all names of places on the map.
+ * 
+ * Input: a list of elements to filter from.
+ * Returns: a list of classes.
+ */
 function getAllItemNames(elements) {
     const list = []
     elements.map((element) => {
@@ -223,7 +256,12 @@ function getAllItemNames(elements) {
     return list
 }
 
-/* function to search preliminary locations for labels */
+/***
+ * Function to search surrounding area (within one unit) of a place to put its label.
+ * 
+ * Input: the x-y coordinate of the place.
+ * Returns: the x-y coordinate of a free space if found, null otherwise.
+ */
 function searchPreliminaryLocations(x, y) {
     let tmp_x = x
     let tmp_y = y
@@ -242,14 +280,23 @@ function searchPreliminaryLocations(x, y) {
     return [tmp_x, tmp_y]
 }
 
-/* function to find a path between two locations, using Breadth First Search */
+/***
+ * Function to find a path between two locations. Uses the Breadth First Search graph algorithm.
+ * 
+ * Input: the x-y coordinates of the start and destination.
+ * Returns: a list of the nodes along the path if a path was found, undefined otherwise.
+ */
 function findShortestPath(x1, y1, x2, y2) {
+    // initialization
     this.nodes[x1][y1].visited = true
     const queue = []
     queue.push(this.nodes[x1][y1])
+
+    // perform the search
     while (queue.length !== 0) {
         u = queue.shift()
         if (u === this.nodes[x2][y2]) {
+            // found the destination, prepare a list to return
             let curr = u
             const ret = []
             while (curr !== null) {
@@ -258,6 +305,7 @@ function findShortestPath(x1, y1, x2, y2) {
             }
             return ret
         }
+        // look at surrounding neighbours
         for (let i = 0; i < u.neighbours.length; i++) {
             if (u.neighbours[i].visited === false) {
                 u.neighbours[i].visited = true
@@ -268,26 +316,35 @@ function findShortestPath(x1, y1, x2, y2) {
     }
 }
 
-/* function to clear the tree structure formed by BFS, and remove nav on map */
+/***
+ * Function to clear the tree structure formed by findShortestPath(), and remove the 
+ * navigation path that was displayed on the map.
+ */
 function clearNavigation() {
+    // clear the tree structure
     for (let i = 0; i < this.width; i++) {
         for (let j = 0; j < this.height; j++) {
             this.nodes[i][j].visited = false
             this.nodes[i][j].parent = null
         }
     }
+    // reset the labels and delete the path that was drawn
     const navigationContainer = document.getElementById(this.id + '.navigationContainer')
     navigationContainer.textContent = ''
     const srcLabel = document.getElementById(this.id + '.srcLabel')
     const destLabel = document.getElementById(this.id + '.destLabel')
-    srcLabel.textContent = 'Select an item to mark as source.'
-    destLabel.textContent = 'Select an item to mark as destination.'
-
+    srcLabel.textContent = 'Select a place to mark as starting point.'
+    destLabel.textContent = 'Select a place to mark as destination.'
 }
 
 /*** DOM manipulation functions ***/
 
-/* function to set up the map */
+/***
+ * DOM manipulation function to set up the map diagram. Initializes all applicable
+ * containers, titles, etc. and adds them to the body of the document.
+ * 
+ * Input: the title and description of the map.
+ */
 function mapSetUp(title, description) {
     const body = $('body')
 
@@ -297,7 +354,7 @@ function mapSetUp(title, description) {
     container.className = 'SMDcontainer'
     body.append(container)
 
-    // create a title and subtitle
+    // create a title and subtitle along with a container for them
     const titleContainer = document.createElement('div')
     const titleElement = document.createElement('h2')
     titleElement.append(document.createTextNode(title))
@@ -316,13 +373,23 @@ function mapSetUp(title, description) {
     mapContainer.className = 'controlContainer'
     container.append(mapContainer)
 
-    // the map itself
+    // create the map itself
     const map = document.createElement('div')
     map.id = this.id + '.map'
     map.className = 'mapContainer'
     map.style.height = (this.height * 50 + 60) + 'px'
     map.style.width = (this.width * 50 + 60) + 'px'
     mapContainer.append(map)
+
+    // create some buttons on the map (clear all button, etc.)
+    const clearButton = document.createElement('button')
+    clearButton.append(document.createTextNode('Clear all'))
+    mapContainer.append(clearButton)
+    clearButton.className = 'mapButton'
+    clearButton.addEventListener('click', () => {
+        clearAllHighlights.bind(this)()
+        clearNavigation.bind(this)()
+    })
     
     // create a container for the nodes
     const nodes = document.createElement('div')
@@ -359,8 +426,10 @@ function mapSetUp(title, description) {
     map.append(navigationContainer)
 }
 
-/* function to set up the info box */
-function initializeControlBox() {
+/***
+ * DOM manipulation function to initialize the information box beneath the map.
+ */
+function initializeInfoBox() {
     const mapContainer = document.getElementById(this.id + '.mapContainer')
     const controlBox = document.createElement('div')
     controlBox.className = 'controlBox'
@@ -375,40 +444,52 @@ function initializeControlBox() {
     controlBox.append(infoLabel)
     controlBox.append(descriptionLabel)
 
-    // labels to display navigation information
+    // add to the document
+    mapContainer.append(controlBox)
+}
+
+/***
+ * DOM manipulation function to create a navigation menu.
+ */
+function initializeNavigationMenu() {
+    const mapContainer = document.getElementById(this.id + '.mapContainer')
+    const navigationBox = document.createElement('div')
+    navigationBox.className = 'controlBox'
+
+    // labels to display information
     const navLabel = document.createElement('h4')
     navLabel.append(document.createTextNode('Navigation'))
     const list = document.createElement('ul')
     const srcLabel = document.createElement('li')
     srcLabel.id = this.id + '.srcLabel'
     srcLabel.className = 'controlLabel'
-    srcLabel.append(document.createTextNode('Select an item to mark as source.'))
+    srcLabel.append(document.createTextNode('Select a place to mark as starting point.'))
     const destLabel = document.createElement('li')
     destLabel.id = this.id + '.destLabel'
     destLabel.className = 'controlLabel'
-    destLabel.append(document.createTextNode('Select an item to mark as destination.'))
+    destLabel.append(document.createTextNode('Select a place to mark as destination.'))
     list.append(srcLabel)
     list.append(destLabel)
-    controlBox.append(navLabel)
-    controlBox.append(list)
+    navigationBox.append(navLabel)
+    navigationBox.append(list)
 
     // button to mark the source
     const srcButton = document.createElement('button')
-    controlBox.append(srcButton)
+    navigationBox.append(srcButton)
     srcButton.className = 'navigateButton'
     srcButton.append(document.createTextNode('Choose starting point'))
     srcButton.addEventListener('click', () => { state = 'selectSrc' })
 
     // button to mark the destination
     const destButton = document.createElement('button')
-    controlBox.append(destButton)
+    navigationBox.append(destButton)
     destButton.className = 'navigateButton'
     destButton.append(document.createTextNode('Choose destination'))
     destButton.addEventListener('click', () => { state = 'selectDest' })
 
     // button to display navigation on screen
     const navigateButton = document.createElement('button')
-    controlBox.append(navigateButton)
+    navigationBox.append(navigateButton)
     navigateButton.className = 'navigateButton'
     navigateButton.append(document.createTextNode('Navigate!'))
     navigateButton.addEventListener('click', () => {
@@ -430,27 +511,21 @@ function initializeControlBox() {
             }
             source = undefined
             destination = undefined
+            state = 'view'
         }
     })
 
-    // button to clear navigation
-    const clearButton = document.createElement('button')
-    controlBox.append(clearButton)
-    clearButton.className = 'navigateButton'
-    clearButton.append(document.createTextNode('Clear'))
-    clearButton.addEventListener('click', () => {
-        clearNavigation.bind(this)()
-    })
-
     // add to the document
-    mapContainer.append(controlBox)
+    mapContainer.append(navigationBox)
 }
 
-/* function to set up the grid of nodes */
+/***
+ * DOM manipulation function to initialize a grid of nodes.
+ */
 function initializeNodes() {
     const nodesContainer = document.getElementById(this.id + '.nodes')
 
-    // initialize a 2D grid of nodes
+    // initialize a 2D grid of nodes, organized using unordered lists
     for (let i = 0; i < this.width; i++) {
         const column = document.createElement('ul')
         this.nodes[i] = []
@@ -470,7 +545,6 @@ function initializeNodes() {
                 x: i,
                 y: j
             }
-            
             item.appendChild(node)
             column.appendChild(item)
             node.addEventListener('click', () => {
@@ -489,7 +563,11 @@ function initializeNodes() {
     }
 }
 
-/* function to add a connection between two nodes */
+/*** 
+ * DOM manipulation function to add a connection between two nodes.
+ * 
+ * Input: the x-y coordinates of both nodes.
+ */
 function addConnection(x1, y1, x2, y2) {
     const connectionsContainer = document.getElementById(this.id + '.connectionsContainer')
     const line = document.createElement('div')
@@ -516,7 +594,7 @@ function addConnection(x1, y1, x2, y2) {
         document.getElementById(this.nodes[x1][y2].id).classList.add('intersection')
     }
 
-    // update neighbours
+    // update the neighbours between the two nodes
     for (let i = x1; i <= x2; i++) {
         if (i > 0) {
             this.nodes[i][y1].neighbours.push(this.nodes[i-1][y1])
@@ -534,7 +612,7 @@ function addConnection(x1, y1, x2, y2) {
         }
     }
 
-    // create the element
+    // create the element and add it to the document
     line.style.width = width + 'px'
     line.style.height = height + 'px'
     line.style.left = (50 * (x1 + 1) + 5) + 'px'
@@ -542,9 +620,16 @@ function addConnection(x1, y1, x2, y2) {
     connectionsContainer.append(line)
 }
 
-/* function to add a block place to the map (i.e., a place that fits between streets) */
+/***
+ * DOM manipulation function to add a block place to the map (i.e., a place that fits 
+ * between streets).
+ * 
+ * Input: a blockPlace object, containing all required info about the block place.
+ */
 function createBlockPlace(blockPlace) {
     const blockPlacesContainer = document.getElementById(this.id + '.blockPlacesContainer')
+    
+    // create the block place based on the given information and add to document
     const block = document.createElement('div')
     block.id = blockPlace.getID(this.id)
     block.classList.add('block')
@@ -599,7 +684,7 @@ function createBlockPlace(blockPlace) {
         }
     })
 
-    // when the place is hover over-ed, make the text bold
+    // when the place is hovered over, make the text bold
     const element = document.getElementById(blockPlace.getID(this.id))
     block.addEventListener('mouseover', function(e) {
         element.classList.add('hoverOver')
@@ -609,9 +694,16 @@ function createBlockPlace(blockPlace) {
     })
 }
 
-/* function to add a line place to the map (i.e., a place that fits on a connection) */
+/***
+ * DOM manipulation function to add a line place to the map (i.e., a place that fits 
+ * on a connection).
+ * 
+ * Input: a blockPlace object, containing all required info about the block place.
+ */
 function createLinePlace(linePlace) {
     const linePlacesContainer = document.getElementById(this.id + '.linePlacesContainer')
+    
+    // create the line place based on the given information and add to document
     const line = document.createElement('div')
     line.id = linePlace.getID(this.id)
     line.classList.add('line')
@@ -679,7 +771,7 @@ function createLinePlace(linePlace) {
         }
     })
 
-    // when the place is hover over-ed, make the text bold
+    // when the place is hovered over, make the text bold
     const element = document.getElementById(linePlace.getID(this.id))
     line.addEventListener('mouseover', function(e) {
         element.classList.add('hoverOver')
@@ -689,9 +781,16 @@ function createLinePlace(linePlace) {
     })
 }
 
-/* function to add a node place to the map (i.e., a place that falls on a node) */
+/***
+ * DOM manipulation function to add a node place to the map (i.e., a place that fits 
+ * on a node).
+ * 
+ * Input: a blockPlace object, containing all required info about the block place.
+ */
 function createNodePlace(nodePlace) {
     const nodePlacesContainer = document.getElementById(this.id + '.nodePlacesContainer')
+    
+    // create the node place based on the given information and add to document
     const node = document.createElement('div')
     node.id = nodePlace.getID(this.id)
     node.className = nodePlace.class
@@ -740,7 +839,7 @@ function createNodePlace(nodePlace) {
         }
     })
 
-    // when the place is hover over-ed, make the text bold
+    // when the place is hovered over, make the text bold
     const element = document.getElementById(nodePlace.getID(this.id))
     node.addEventListener('mouseover', function(e) {
         element.classList.add('hoverOver')
@@ -760,7 +859,11 @@ function toggleHighlightBlockPlace(id) {
     }    
 }
 
-/* function to add a legend to the map */
+/***
+ * DOM manipulation function to add a legend to the map.
+ * 
+ * Input: lists of all places on the map.
+ */
 function addLegend(blocks, lines, nodes) {
     const controlCentre = document.getElementById(this.id + '.controlCentre')
     const legend = document.createElement('div')
@@ -817,8 +920,10 @@ function addLegend(blocks, lines, nodes) {
 
 }
 
-/* function to add a menu to filter places by type */
-function addFilterBox(options, title, description, places, elementGetter) {
+/***
+ * DOM manipulation function to add a menu to filter all places by type.
+ */
+function addFilterMenu(options, title, description, places, elementGetter) {
     const controlCentre = document.getElementById(this.id + '.controlCentre')
     const filterBox = document.createElement('div')
     filterBox.className = 'controlBox'
@@ -833,39 +938,33 @@ function addFilterBox(options, title, description, places, elementGetter) {
     filterBox.append(label)
     filterBox.append(instruction)
 
-    // add a list of clickable items
-    const list = document.createElement('ul')
+    // add a select box
+    const list = document.createElement('select')
     filterBox.append(list)
-    
     options.map((element) => {
-        const item = document.createElement('li')
-        
-        // add a check box
-        const checkBox = document.createElement('input')
-        checkBox.id = this.id + '.fb.' + element
-        checkBox.type = 'checkbox'
-
-        // add a label
-        const label = document.createElement('label')
-        label.append(document.createTextNode(element))
-        label.htmlFor = checkBox.id
-        label.className = 'controlLabel'
-        item.append(checkBox)
-        item.append(label)
-        
+        const item = document.createElement('option')
+        item.value = element
+        item.append(document.createTextNode(element))
         list.append(item)
-        const elements = elementGetter.bind(this)(element, places)
-
-        // when a place name is clicked, highlight it on the map
-        checkBox.addEventListener('click', () => {
-            elements.map((id) => {
-                toggleHighlightBlockPlace(id)
-            })
+    })
+    const submitButton = document.createElement('button')
+    submitButton.append(document.createTextNode('OK'))
+    submitButton.addEventListener('click', () => {
+        const elements = elementGetter.bind(this)(list.value, places)
+        clearAllHighlights.bind(this)()
+        elements.map((id) => {
+            toggleHighlightBlockPlace(id)
         })
     })
+    filterBox.append(submitButton)
+    
 }
 
-/* function to draw a path between two nodes on the map */
+/***
+ * DOM manipulation function to draw a path between two nodes on the map.
+ * 
+ * Input: the path to draw.
+ */
 function drawPath(path) {
     // draw source
     const navigationContainer = document.getElementById(this.id + '.navigationContainer')
@@ -889,12 +988,13 @@ function drawPath(path) {
     navigationContainer.append(dest)
     
     for (let i = 1; i < path.length; i++) {
-
+        // get the x-y coordinates of the two nodes to connect
         const x1 = path[i - 1].x
         const y1 = path[i - 1].y
         const x2 = path[i].x
         const y2 = path[i].y
 
+        // draw a path between them
         const line = document.createElement('div')
         line.classList.add('line')
         line.classList.add('path')
@@ -911,7 +1011,7 @@ function drawPath(path) {
             height = (Math.abs(y2 - y1) * 50)
         }
 
-        // create the element
+        // create the element and add to the document
         line.style.width = width + 'px'
         line.style.height = height + 'px'
         line.style.left = (50 * (Math.min(x1, x2) + 1) + 5) + 'px'
@@ -919,4 +1019,15 @@ function drawPath(path) {
         line.style.zIndex = 4
         navigationContainer.append(line)
     }
+}
+
+/***
+ * DOM manipulation function to clear all highlighted items.
+ */
+function clearAllHighlights() {
+    const all_places = this.blockPlaces.concat(this.linePlaces).concat(this.nodePlaces)
+    all_places.map((place) => {
+        const element = document.getElementById(place.getID(this.id))
+        element.classList.remove('highlight')
+    })
 }

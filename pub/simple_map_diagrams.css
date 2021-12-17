@@ -87,6 +87,10 @@
     background-color: lightskyblue;
 }
 
+.hospital {
+    background-color: lightpink;
+}
+
 /* nodes css */
 
 .node {
@@ -148,6 +152,7 @@
     float:left;
     background-color: rgb(229, 234, 240);
     margin:15px;
+    min-width: 500px;
 }
 
 .titleContainer {
@@ -158,9 +163,16 @@
     width: 100%;
 }
 
-.controlBox {
+.sideBox {
     position: relative;
     width: 300px;
+    height: auto;
+    padding: 20px;
+}
+
+.underBox {
+    position: relative;
+    width: 500px;
     height: auto;
     padding: 20px;
 }

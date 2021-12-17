@@ -35,6 +35,17 @@
     let _source = undefined         // global source - used for navigation
     let _destination = undefined    // global destination - used for navigation
     let _state = 'view'             // global state - used for navigation buttons
+    
+    let _placeTypeMap = new Map()
+    _placeTypeMap.set('park', ['Park', 'block'])
+    _placeTypeMap.set('building', ['Building', 'block'])
+    _placeTypeMap.set('water', ['Water', 'block'])
+    _placeTypeMap.set('hospital', ['Hospital', 'block'])
+    _placeTypeMap.set('street', ['Street', 'line'])
+    _placeTypeMap.set('transitLine', ['Transit Line', 'line'])
+    _placeTypeMap.set('poi', ['Point of Interest', 'node'])
+    _placeTypeMap.set('specialEvent', ['Special Event', 'node'])
+    _placeTypeMap.set('incident', ['Incident', 'node'])
 
     SimpleMapDiagram.prototype = {
 
@@ -55,22 +66,25 @@
             initializeInfoBox.bind(this)()
             initializeNavigationMenu.bind(this)()
             addLegend.bind(this)(
-                getAllItemClasses(this.blockPlaces), 
-                getAllItemClasses(this.linePlaces), 
-                getAllItemClasses(this.nodePlaces), this.id
+                getAllItemClasses(this.blockPlaces)
+                .concat(getAllItemClasses(this.linePlaces)) 
+                .concat(getAllItemClasses(this.nodePlaces)), this.id
             )
             const all_places = this.blockPlaces.concat(this.linePlaces).concat(this.nodePlaces)
-            addFilterMenu.bind(this)(getAllItemNames(all_places), 'Filter items by type:', '', all_places, getPlaceByName)
-            addFilterMenu.bind(this)(getAllItemNames(all_places), 'Filter items by name:', '', all_places, getPlaceByName)
+            addFilterMenu.bind(this)(getAllItemClasses(all_places), 'Filter items by type:', all_places, getPlacesByType)
+            addFilterMenu.bind(this)(getAllItemNames(all_places), 'Filter items by name:', all_places, getPlaceByName)
         },
 
         /***
          * API function to add a connection between the given nodes.
          * 
          * Input: the x-y coordinates of the nodes.
+         * Return: true on success, false on failure (e.g., a diagonal line is given)
          */
         addConnection: function(x1, y1, x2, y2) {
+            if (!(x1 === x2 || y1 === y2)) return false
             addConnection.bind(this)(x1, y1, x2, y2)
+            return true
         },
 
         /***
@@ -78,6 +92,7 @@
          * 
          * Input: a list of the connections to add, in the following form:
          * [[x1, y1, x2, y2], [...], [...], ... ]
+         * Return: true on success, false on failure (e.g., a diagonal line is given)
          */
         addMultipleConnections: function(connections) {
             connections.map((element) => {
@@ -90,11 +105,19 @@
          * Note: type must match one of the pre-defined types in the CSS file.
          * 
          * Input: the x-y coordinates, width and height, name, title, and description of the place.
+         * Return: true on success, false on failure (e.g., unrecognized type).
          */
         addBlockPlace: function(x, y, width, height, name, type, description) {
-            const blockPlace = new BlockPlace(x, y, width, height, name, type, description)
-            createBlockPlace.bind(this)(blockPlace)
-            this.blockPlaces.push(blockPlace)
+            try {
+                if (_placeTypeMap.get(type)[1] !== 'block') return false
+                const blockPlace = new BlockPlace(x, y, width, height, name, type, description)
+                createBlockPlace.bind(this)(blockPlace)
+                this.blockPlaces.push(blockPlace)
+            } catch (error) {
+                if (_DEBUG) console.log('unrecognized block place type')
+                return false
+            }
+            return true
         },
 
         /***
@@ -102,11 +125,19 @@
          * Note: type must match one of the pre-defined types in the CSS file.
          * 
          * Input: the x-y coordinates of the start and end, name, title, and description of the place.
+         * Return: true on success, false on failure (e.g., unrecognized type).
          */
         addLinePlace: function(x1, y1, x2, y2, name, type, description) {
-            const linePlace = new LinePlace(x1, y1, x2, y2, name, type, description)
-            createLinePlace.bind(this)(linePlace)
-            this.linePlaces.push(linePlace)
+            try {
+                if (_placeTypeMap.get(type)[1] !== 'line') return false
+                const linePlace = new LinePlace(x1, y1, x2, y2, name, type, description)
+                createLinePlace.bind(this)(linePlace)
+                this.linePlaces.push(linePlace)
+            } catch (error) {
+                if (_DEBUG) console.log('unrecognized line place type')
+                return false
+            }
+            return true
         },
 
         /***
@@ -114,11 +145,19 @@
          * Note: type must match one of the pre-defined types in the CSS file.
          * 
          * Input: the x-y coordinates, name, title, and description of the place.
+         * Return: true on success, false on failure (e.g., unrecognized type).
          */
         addNodePlace: function(x, y, name, type, description) {
-            const nodePlace = new NodePlace(x, y, name, type, description)
-            createNodePlace.bind(this)(nodePlace)
-            this.nodePlaces.push(nodePlace)
+            try {
+                if (_placeTypeMap.get(type)[1] !== 'node') return false
+                const nodePlace = new NodePlace(x, y, name, type, description)
+                createNodePlace.bind(this)(nodePlace)
+                this.nodePlaces.push(nodePlace)
+            } catch (error) {
+                if (_DEBUG) console.log('unrecognized node place type')
+                return false
+            }
+            return true
         },
 
         /***
@@ -142,36 +181,27 @@
          * 
          * Input: the options to be included. If none are given, default to including all.
          */
-        addFilterByClassBox: function(options) {
+        addFilterByClassBox: function() {
             const all_places = this.blockPlaces.concat(this.linePlaces).concat(this.nodePlaces)
-            // if no options are given, default to include all
-            if (!options) {
-                options = getAllItemClasses(all_places)
-            }
-            addFilterMenu.bind(this)(options, 'Filter items by type:', all_places, getAllPlacesByClass)
+            addFilterMenu.bind(this)(getAllItemClasses(all_places), 'Filter items by type:', all_places, getPlacesByType)
         },
 
         /***
          * API function to add a filter box which will give users the option to 
          * filter by certain place type.
-         * 
-         * Input: the options to be included. If none are given, default to including all.
          */
-        addFilterByNameBox: function(options) {
+        addFilterByNameBox: function() {
             const all_places = this.blockPlaces.concat(this.linePlaces).concat(this.nodePlaces)
-            // if no options are given, default to include all
-            if (!options) {
-                options = getAllItemNames(all_places)
-            }
-            addFilterMenu.bind(this)(options, 'Filter items by name:', description, all_places, getPlaceByName)
+            addFilterMenu.bind(this)(getAllItemNames(all_places), 'Filter items by name:', all_places, getPlaceByName)
         },
 
         /***
          * API function to add a legend to the map.
          */
         addLegend: function() {
-            addLegend(getAllItemClasses(this.blockPlaces), 
-                getAllItemClasses(this.linePlaces), getAllItemClasses(this.nodePlaces), this.id)
+            addLegend(getAllItemClasses(this.blockPlaces)
+            .concat(getAllItemClasses(this.linePlaces))
+            .concat(getAllItemClasses(this.nodePlaces), this.id))
         }
     }
 
@@ -249,7 +279,7 @@
      * Input: the class of elements to get, and a list of elements to filter from.
      * Returns: a list of ids of elements.
      */
-    function getAllPlacesByClass(type, elements) {
+    function getPlacesByType(type, elements) {
         const list = []
         elements.map((element) => {
             if (element.class === type) {
@@ -484,7 +514,7 @@
     function initializeInfoBox() {
         const mapContainer = document.getElementById(this.id + '.mapContainer')
         const controlBox = document.createElement('div')
-        controlBox.className = 'controlBox'
+        controlBox.className = 'underBox'
 
         // labels to display information
         const infoLabel = document.createElement('h4')
@@ -506,7 +536,7 @@
     function initializeNavigationMenu() {
         const mapContainer = document.getElementById(this.id + '.mapContainer')
         const navigationBox = document.createElement('div')
-        navigationBox.className = 'controlBox'
+        navigationBox.className = 'underBox'
 
         // labels to display information
         const navLabel = document.createElement('h4')
@@ -735,7 +765,7 @@
                     destLabel.textContent = 'Destination: ' + blockPlace.name
                 }
             } catch (error) {
-                if (DEBUG) console.log('skipping updating info box -- info box not initialized.')
+                if (_DEBUG) console.log('skipping updating info box -- info box not initialized.')
             }
         })
 
@@ -822,7 +852,7 @@
                     _current = linePlace
                 }
             } catch (error) {
-                if (DEBUG) console.log('skipping updating info box -- info box not initialized.')
+                if (_DEBUG) console.log('skipping updating info box -- info box not initialized.')
             }
         })
 
@@ -890,7 +920,7 @@
                     destLabel.textContent = 'Destination: ' + nodePlace.name
                 }
             } catch (error) {
-                if (DEBUG) console.log('skipping updating info box -- info box not initialized.')
+                if (_DEBUG) console.log('skipping updating info box -- info box not initialized.')
             }
         })
 
@@ -919,10 +949,10 @@
      * 
      * Input: lists of all places on the map.
      */
-    function addLegend(blocks, lines, nodes) {
+    function addLegend(places) {
         const controlCentre = document.getElementById(this.id + '.controlCentre')
         const legend = document.createElement('div')
-        legend.className = 'controlBox'
+        legend.className = 'sideBox'
         controlCentre.append(legend)
 
         // add a title
@@ -935,12 +965,15 @@
         legend.append(list)
 
         // helper function to create legend rows
-        const createLegendRow = (element, type) => {
+        const createLegendRow = (element) => {
             const row = document.createElement('tr')
             const iconCell = document.createElement('td')
             const labelCell = document.createElement('td')
             row.append(iconCell)
             row.append(labelCell)
+
+            const name = _placeTypeMap.get(element)[0]
+            const type = _placeTypeMap.get(element)[1]
 
             // add a mini icon
             const icon = document.createElement('div')
@@ -952,23 +985,16 @@
 
             // add a label
             const label = document.createElement('label')
-            label.append(document.createTextNode(element))
             label.htmlFor = icon.id
             label.className = 'controlLabel'
+            label.append(document.createTextNode(name))
             labelCell.append(label)
         }
 
         // add all types of elements to the legend
-        blocks.map((element) => {
-            createLegendRow(element, 'block')
+        places.map((element) => {
+            createLegendRow(element)
         })
-        lines.map((element) => {
-            createLegendRow(element, 'line')
-        })
-        nodes.map((element) => {
-            createLegendRow(element, 'node')
-        })
-
     }
 
     /***
@@ -977,7 +1003,7 @@
     function addFilterMenu(options, title, places, elementGetter) {
         const controlCentre = document.getElementById(this.id + '.controlCentre')
         const filterBox = document.createElement('div')
-        filterBox.className = 'controlBox'
+        filterBox.className = 'sideBox'
         controlCentre.append(filterBox)
         
         // add a title
@@ -992,7 +1018,13 @@
         options.map((element) => {
             const item = document.createElement('option')
             item.value = element
-            item.append(document.createTextNode(element))
+            try {
+                // try to convert a place type to an ordinary string
+                item.append(document.createTextNode(_placeTypeMap.get(element)[0]))
+            } catch (error) {
+                // if this is a name, just add it directly
+                item.append(document.createTextNode(element))
+            }
             list.append(item)
         })
         const submitButton = document.createElement('button')
@@ -1052,13 +1084,13 @@
             // determine the width of the connection line
             let width = 7;
             if (x1 !== x2) {
-                width = (Math.abs(x2 - x1) * 50)
+                width = (Math.abs(x2 - x1) * 50 + 5)
             }
             
             // determine the height of the connection line
             let height = 7;
             if (y1 !== y2) {
-                height = (Math.abs(y2 - y1) * 50)
+                height = (Math.abs(y2 - y1) * 50 + 5)
             }
 
             // create the element and add to the document

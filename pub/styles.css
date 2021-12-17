@@ -20,11 +20,8 @@ p {
 }
 
 code {
-
 	font-weight: bold;
-
 	color: #669df6;
-
 }
 
 #topNavBar {
@@ -39,7 +36,7 @@ code {
 }
 
 #topNavBar ul li {
-	list-style: none; /* No bullet points */
+	list-style: none;
 	display: inline;
 }
 
@@ -70,4 +67,28 @@ code {
 .subHeaderText {
 	margin: 5px 10px;
 	color: #669df6;
+}
+
+/* css for place demo in api page */
+
+.blockDemo {
+    width: 20px;
+    height: 20px;
+    float: left;
+	margin-right: 15px;
+}
+
+.lineDemo {
+    width: 50px;
+    height: 10px;
+    float: left;
+	margin-right: 15px;
+}
+
+.nodeDemo {
+    width: 20px;
+    height: 20px;
+    float: left;
+	margin-right: 15px;
+	border-radius: 50%;
 }

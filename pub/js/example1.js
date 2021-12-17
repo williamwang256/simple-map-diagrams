@@ -23,10 +23,11 @@ e1_smd.addMultipleConnections([
 // add some block places
 e1_smd.addBlockPlace(4, 2, 1, 2, 'Central Park', 'park', 'The main park on campus. ')
 e1_smd.addBlockPlace(0, 1, 1, 1, 'North Park', 'park', 'Smaller park on the north side of campus.')
-e1_smd.addBlockPlace(3, 3, 1, 1, 'Chem Lab', 'building', 'Chemistry lab at the University of e1_smd.')
-e1_smd.addBlockPlace(1, 3, 1, 1, 'CS Dept.', 'building', 'Department of Computer Science at the University of e1_smd.')
-e1_smd.addBlockPlace(1, 2, 1, 1, 'Student Centre', 'building', 'Student centre at the University of e1_smd. Come here to ask questions.')
+e1_smd.addBlockPlace(3, 3, 1, 1, 'Chem Lab', 'building', 'Chemistry lab at the University of SMD.')
+e1_smd.addBlockPlace(1, 3, 1, 1, 'CS Dept.', 'building', 'Department of Computer Science at the University of SMD.')
+e1_smd.addBlockPlace(1, 2, 1, 1, 'Student Centre', 'building', 'Student centre at the University of SMD. Come here to ask questions.')
 e1_smd.addBlockPlace(7, 3, 1, 1, 'Small Pond', 'water', 'Small pond south of campus.')
+e1_smd.addBlockPlace(2, 3, 1, 1, 'SMD Hospital', 'hospital', 'University of SMD Hospital.')
 e1_smd.addBlockPlace(6, 3, 1, 1, 'John\'s Park', 'park', 'Small park in downtown with a pond.')
 
 // add some line places

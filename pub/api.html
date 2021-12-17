@@ -109,7 +109,7 @@
             <ul>
                 <li><p>Adds a block place to the map, i.e., a place that falls BETWEEN the connections on the map. Note: type must match one of the pre-defined types in the CSS file.</p></li>
                 <li><p>Arguments: the x-y coordinates, width and height, name, title, and description of the place.</p></li>
-                <li><p>Return: N/A.</p></li>
+                <li><p>Return: true on success, false on failure (e.g., unrecognized type).</p></li>
             </ul>
             <br>
 
@@ -117,7 +117,7 @@
             <ul>
                 <li><p>Adds a line place to the map, i.e., a place that falls ON a connection on the map. Note: type must match one of the pre-defined types in the CSS file.</p></li>
                 <li><p>Arguments: the x-y coordinates of the start and end, name, title, and description of the place.</p></li>
-                <li><p>Return: N/A.</p></li>
+                <li><p>Return: true on success, false on failure (e.g., unrecognized type).</p></li>
             </ul>
             <br>
 
@@ -125,7 +125,7 @@
             <ul>
                 <li><p>Adds a node place to the map, i.e., a place that falls ON a NODE of the map. Note: type must match one of the pre-defined types in the CSS file.</p></li>
                 <li><p>Arguments: the x-y coordinates of the start and end, name, title, and description of the place.</p></li>
-                <li><p>Return: N/A.</p></li>
+                <li><p>Return: true on success, false on failure (e.g., unrecognized type).</p></li>
             </ul>
             <br>
 
@@ -145,18 +145,18 @@
             </ul>
             <br>
 
-            <h3><code>smdInstance.addFilterByClassBox(options)</code></h3>
+            <h3><code>smdInstance.addFilterByClassBox()</code></h3>
             <ul>
                 <li><p>API function to add a filter box which will give users the option to filter by certain place type.</p></li>
-                <li><p>Arguments: the options to be included. If none are given, default to including all options on the map.</p></li>
+                <li><p>Arguments: N/A.</p></li>
                 <li><p>Return: N/A.</p></li>
             </ul>
             <br>
 
-            <h3><code>smdInstance.addFilterByNameBox(options)</code></h3>
+            <h3><code>smdInstance.addFilterByNameBox()</code></h3>
             <ul>
                 <li><p>API function to add a filter box which will give users the option to filter by certain place name.</p></li>
-                <li><p>Arguments: the options to be included. If none are given, default to including all options on the map.</p></li>
+                <li><p>Arguments: N/A.</p></li>
                 <li><p>Return: N/A.</p></li>
             </ul>
             <br>
@@ -167,12 +167,60 @@
                 <li><p>Arguments: N/A.</p></li>
                 <li><p>Return: N/A.</p></li>
             </ul>
-            <br>
+            <hr>
             
+            <!-- Place Types -->
+            <h1>Place Types</h1>
+            <p>Listed below are all the categories of places currently supported.</p>
+            <h3>Block Places:</h3>
+            <ul>
+                <li>
+                    <div class="blockDemo park"></div>
+                    <p> Park </p>
+                </li>
+                <li>
+                    <div class="blockDemo building"></div>
+                    <p> Building </p>
+                </li>
+                <li>
+                    <div class="blockDemo water"></div>
+                    <p> Water </p>
+                </li>
+                <li>
+                    <div class="blockDemo hospital"></div>
+                    <p> Hospital </p>
+                </li>
+            </ul>
+            <br>
 
+            <h3>Line Places:</h3>
+            <ul>
+                <li>
+                    <div class="lineDemo street"></div>
+                    <p> Street </p>
+                </li>
+                <li>
+                    <div class="lineDemo transitLine"></div>
+                    <p> Transit Line </p>
+                </li>
+            </ul>
+            <br>
+
+            <h3>Node Places:</h3>
+            <ul>
+                <li>
+                    <div class="nodeDemo poi"></div>
+                    <p> Point of Interest </p>
+                </li>
+                <li>
+                    <div class="nodeDemo specialEvent"></div>
+                    <p> Special Event </p>
+                </li>
+                <li>
+                    <div class="nodeDemo incident"></div>
+                    <p> Incident </p>
+                </li>
+            </ul>
         </div>
-
-        
-        
     </body>
 </html>

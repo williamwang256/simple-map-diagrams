@@ -1,4 +1,4 @@
-/* Simple Map Diagrams Library. */
+/********** Simple Map Diagrams Library. **********/
 
 (function(global, document) {
 
@@ -97,16 +97,15 @@
          * Return: true on success, false on failure (e.g., unrecognized type).
          */
         addBlockPlace: function(x, y, width, height, name, type, description) {
-            if (!validator(x, y) || !validator(width, height)) return false
+            if (!validator(x, y) || !validator(width, height)) return false     // validate input
             if (x + width >= this.width) return false
             if (y + height >= this.height) return false
             try {
-                if (_placeTypeMap.get(type)[1] !== 'block') return false
+                if (_placeTypeMap.get(type)[1] !== 'block') return false        // unrecognized type
                 const blockPlace = new BlockPlace(x, y, width, height, name, type, description)
                 createBlockPlace.bind(this)(blockPlace)
                 this.blockPlaces.push(blockPlace)
             } catch (error) {
-                if (_DEBUG) console.log('unrecognized block place type')
                 return false
             }
             return true
@@ -120,14 +119,13 @@
          * Return: true on success, false on failure (e.g., unrecognized type).
          */
         addLinePlace: function(x1, y1, x2, y2, name, type, description) {
-            if (!validator(x1, y1) || !validator(x2, y2)) return false
+            if (!validator(x1, y1) || !validator(x2, y2)) return false      // validate input
             try {
-                if (_placeTypeMap.get(type)[1] !== 'line') return false
+                if (_placeTypeMap.get(type)[1] !== 'line') return false     // unrecognized type
                 const linePlace = new LinePlace(x1, y1, x2, y2, name, type, description)
                 createLinePlace.bind(this)(linePlace)
                 this.linePlaces.push(linePlace)
             } catch (error) {
-                if (_DEBUG) console.log('unrecognized line place type')
                 return false
             }
             return true
@@ -148,7 +146,6 @@
                 createNodePlace.bind(this)(nodePlace)
                 this.nodePlaces.push(nodePlace)
             } catch (error) {
-                if (_DEBUG) console.log('unrecognized node place type')
                 return false
             }
             return true
@@ -198,12 +195,21 @@
         }
     }
 
-    /*** Classes for place objects ***/
+    /********** Classes for place objects **********/
 
     /***
      * A class representing a block place.
      */
     class BlockPlace {
+
+        /***
+         * Constructor for the BlockPlace class.
+         * Note: type must match one of the pre-defined types in the CSS file. This is 
+         * assumed to have been already verifed prior to calling this constructor.
+         * 
+         * Input: the x-y coordinates, width, height (all non-negative integers), and the
+         * name, type, and description of the place.
+         */
         constructor(x, y, width, height, name, type, description) {
             this.x = x
             this.y = y
@@ -215,7 +221,9 @@
         }
 
         /***
-         * Gets the id of this place, given its SMD id
+         * Gets the id of this place.
+         * 
+         * Input: the SMD id of the SMD this place belongs to.
          */
         getID(id) {
             return id + '.b.' + this.x + '.' + this.y
@@ -226,6 +234,15 @@
      * A class representing a line place.
      */
     class LinePlace {
+
+        /***
+         * Constructor for the LinePlace class.
+         * Note: type must match one of the pre-defined types in the CSS file. This is 
+         * assumed to have been already verifed prior to calling this constructor.
+         * 
+         * Input: the x-y coordinates (non-negative integers) of both endpoints, the name, type, and 
+         * description of the line place.
+         */
         constructor(x1, y1, x2, y2, name, type, description) {
             this.x1 = x1
             this.y1 = y1
@@ -237,7 +254,9 @@
         }
 
         /***
-         * Gets the id of this place, given its SMD id
+         * Gets the id of this place.
+         * 
+         * Input: the SMD id of the SMD this place belongs to.
          */
         getID(id) {
             return id + '.l.' + this.x1 + '.' + this.y1 + '.' + this.x2 + '.' + this.y2
@@ -248,6 +267,15 @@
      * A class representing a node place.
      */
     class NodePlace {
+
+        /***
+         * Constructor for the NodePlace class.
+         * Note: type must match one of the pre-defined types in the CSS file. This is 
+         * assumed to have been already verifed prior to calling this constructor.
+         * 
+         * Input: the x-y coordinates (integers), name, type, and description of the 
+         * node place.
+         */
         constructor(x, y, name, type, description) {
             this.x = x
             this.y = y
@@ -257,14 +285,45 @@
         }
 
         /***
-         * Gets the id of this place, given its SMD id
+         * Gets the id of this place.
+         * 
+         * Input: the SMD id of the SMD this place belongs to.
          */
         getID(id) {
             return id + '.n.' + this.x + '.' + this.y
         }
     }
 
-    /*** Helper functions ***/
+    /***
+     * A class representing a node on the graph. Used for layout purposes and Navigation
+     * algorithm. Not all nodes will represent visible DOM elements upon intialization.
+     */
+    class Node {
+
+        /***
+         * Constructor for the Node class.
+         * 
+         * Input: the x-y coordinates (non-negative integers) of the node.
+         */
+        constructor(x, y) {
+            this.x = x
+            this.y = y
+            this.parent = null
+            this.visited = false
+            this.neighbours = []
+        }
+
+        /***
+         * Gets the id of this place.
+         * 
+         * Input: the SMD id of the SMD this place belongs to.
+         */
+        getID(id) {
+            return id + '.sn.' + this.x + '.' + this.y
+        }
+    }
+
+    /********** Helper functions **********/
 
     /***
      * Function to perform default set up tasks.
@@ -461,7 +520,7 @@
         return true
     }
 
-    /*** DOM manipulation functions ***/
+    /********** DOM manipulation functions **********/
 
     /***
      * DOM manipulation function to do fundamental set up for map diagram. Initializes all applicable
@@ -660,22 +719,18 @@
             column.className = 'SMDlist'
             this.nodes[i] = []
             for (let j = 0; j < this.height; j++) {
+                const newNode = new Node(i, j)
                 const node = document.createElement('div')
                 const item = document.createElement('li')
+
                 node.style.left = i * 50 + 50 + 'px'
                 node.style.top = j * 50 + 50 + 'px'
-                node.id = this.id + '.sn.' + i + '.' + j
+                node.id = newNode.getID(this.id)
                 node.classList.add('node', 'invisibleIntersection')
-                this.nodes[i][j] = {
-                    id: node.id,
-                    neighbours: [],     // these fields are used for BFS
-                    parent: null,
-                    visited: false,
-                    x: i,
-                    y: j
-                }
                 item.append(node)
                 column.append(item)
+                this.nodes[i][j] = newNode
+
                 node.addEventListener('click', () => {
                     if (_state === 'selectSrc') {
                         const srcLabel = document.getElementById(this.id + '.srcLabel')
@@ -708,16 +763,16 @@
         let width = 5;
         if (x1 !== x2) {
             width = ((x2 - x1) * 50)
-            document.getElementById(this.nodes[x1][y1].id).classList.add('node', 'intersection')
-            document.getElementById(this.nodes[x2][y1].id).classList.add('node', 'intersection')
+            document.getElementById(this.nodes[x1][y1].getID(this.id)).classList.add('node', 'intersection')
+            document.getElementById(this.nodes[x2][y1].getID(this.id)).classList.add('node', 'intersection')
         }
         
         // determine the height of the connection line and add intersections along the way
         let height = 5;
         if (y1 !== y2) {
             height = ((y2 - y1) * 50)
-            document.getElementById(this.nodes[x1][y1].id).classList.add('node', 'intersection')
-            document.getElementById(this.nodes[x1][y2].id).classList.add('node', 'intersection')
+            document.getElementById(this.nodes[x1][y1].getID(this.id)).classList.add('node', 'intersection')
+            document.getElementById(this.nodes[x1][y2].getID(this.id)).classList.add('node', 'intersection')
         }
 
         // update the neighbours between the two nodes
@@ -796,7 +851,7 @@
                     destLabel.textContent = 'Destination: ' + blockPlace.name
                 }
             } catch (error) {
-                if (_DEBUG) console.log('skipping updating info box -- info box not initialized.')
+                // control box not initialized -- not an issue, just continue execution
             }
         })
 
@@ -872,8 +927,8 @@
                     descriptionLabel.textContent = linePlace.description
                     _current = linePlace
                 }
-            } catch (error) {
-                if (_DEBUG) console.log('skipping updating info box -- info box not initialized.')
+            } catch (error) { 
+                // control box not initialized -- not an issue, just continue execution
             }
         })
 
@@ -935,7 +990,7 @@
                     destLabel.textContent = 'Destination: ' + nodePlace.name
                 }
             } catch (error) {
-                if (_DEBUG) console.log('skipping updating info box -- info box not initialized.')
+                if (_VERBOSE) console.log('skipping updating info box -- info box not initialized.')
             }
         })
 

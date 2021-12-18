@@ -12,7 +12,10 @@
         <!-- Header -->
         <div class="header">
             <h1 class="headerText">Simple Map Diagrams</h1>
-            <p class="subHeaderText">Create highly specific and customizable interactive mini-maps for your web apps using the Simple Map Diagrams JavaScript library.
+            <p class="subHeaderText">
+                Create highly specific and customizable interactive mini-maps for your 
+                web apps using the Simple Map Diagrams JavaScript library.
+            </p>
         </div>
 
         <!-- Navigation bar -->
@@ -51,7 +54,8 @@
                 </li>
                 <li>
                     <p>
-                        And that's it! No other external modules or libraries are needed. Simple Map Diagramss uses Vanilla JavaScript only.
+                        And that's it! No other external modules or libraries are needed. Simple Map Diagramss uses 
+                        Vanilla JavaScript only.
                     </p>
                 </li>
             </ul>
@@ -63,154 +67,136 @@
                 const smd = new SimpleMapDiagram(10, 5, 'sample title', 'sample description', 'example1') <br>
             </code>
             <p>
-                This line will go through a series of tasks to set up all the necessary objects and containers needed for the map, 
-                and add it to the document, under the container specified by the given id (in this case, the element with id 'example1'). 
-                Once this is done, you are ready to start customizing the map! See the list of API functions below for instructions on how to do so.
+                This line will go through a series of tasks to set up all the necessary objects and containers needed 
+                for the map, and add it to the document, under the container specified by the given id (in this case, 
+                the element with id 'example1'). Once this is done, you are ready to start customizing the map! See 
+                the list of API functions below for instructions on how to do so.
             </p>
+            <br>
             <hr>
+            <br>
 
             <!-- API List -->
             <h1>List of API Functions</h1>
 
             <h3><code>smdInstance.defaultSetUp()</code></h3>
             <ul>
-                <li><p>Completes a default setup of the map diagram, including all available features.</p></li>
-                <li><p>Arguments: N/A.</p></li>
-                <li><p>Return: N/A.</p></li>
+                <li>Completes a default setup of the map diagram, including all available features.</li>
+                <li>Arguments: N/A.</li>
+                <li>Return: N/A.</li>
             </ul>
             <br>
 
             <h3><code>smdInstance.addConnection(x1, y1, x2, y2)</code></h3>
             <ul>
-                <li><p>Adds a connection between the nodes represented by the two given points.</p></li>
-                <li><p>Arguments: the x-y coordinates of the two points to connect.</p></li>
-                <li><p>Return: N/A.</p></li>
+                <li>Adds a connection between the nodes represented by the two given points.</li>
+                <li>Arguments: the x-y coordinates of the two points to connect.</li>
+                <li>Return: true on success, false on failure (e.g., values out of bound).</li>
             </ul>
             <br>
 
             <h3><code>smdInstance.addMultipleConnections(connections)</code></h3>
             <ul>
-                <li><p>Adds add multiple connections to the graph at once.</p></li>
-                <li><p>Arguments: a list of the connections to add, in the following form: [[x1, y1, x2, y2], [...], [...], ... ]</p></li>
-                <li><p>Return: N/A.</p></li>
+                <li>Adds add multiple connections to the graph at once.</li>
+                <li>Arguments: a list of the connections to add, in the following form: 
+                        [[x1, y1, x2, y2], [...], [...], ... ]</li>
+                <li>Return: true on success, false on failure (e.g., values out of bound)</li>
             </ul>
             <br>
 
             <h3><code>smdInstance.addBlockPlace(x, y, width, height, name, type, description)</code></h3>
             <ul>
-                <li><p>Adds a block place to the map, i.e., a place that falls BETWEEN the connections on the map. Note: type must match one of the pre-defined types in the CSS file.</p></li>
-                <li><p>Arguments: the x-y coordinates, width and height, name, title, and description of the place.</p></li>
-                <li><p>Return: true on success, false on failure (e.g., unrecognized type).</p></li>
+                <li>Adds a block place to the map, i.e., a place that falls BETWEEN the connections on the map. 
+                    Note: type must match one of the pre-defined types in the CSS file.</li>
+                <li>Arguments: the x-y coordinates, width and height, name, title, and description of the place.</li>
+                <li>Return: true on success, false on failure (e.g., unrecognized type).</li>
             </ul>
             <br>
 
             <h3><code>smdInstance.addLinePlace(x1, y1, x2, y2, name, type, description)</code></h3>
             <ul>
-                <li><p>Adds a line place to the map, i.e., a place that falls ON a connection on the map. Note: type must match one of the pre-defined types in the CSS file.</p></li>
-                <li><p>Arguments: the x-y coordinates of the start and end, name, title, and description of the place.</p></li>
-                <li><p>Return: true on success, false on failure (e.g., unrecognized type).</p></li>
+                <li>Adds a line place to the map, i.e., a place that falls ON a connection on the map. 
+                    Note: type must match one of the pre-defined types in the CSS file.</li>
+                <li>Arguments: the x-y coordinates of the start and end, name, title, and description of the place.</li>
+                <li>Return: true on success, false on failure (e.g., unrecognized type).</li>
             </ul>
             <br>
 
             <h3><code>smdInstance.addNodePlace(x, y, name, type, description)</code></h3>
             <ul>
-                <li><p>Adds a node place to the map, i.e., a place that falls ON a NODE of the map. Note: type must match one of the pre-defined types in the CSS file.</p></li>
-                <li><p>Arguments: the x-y coordinates of the start and end, name, title, and description of the place.</p></li>
-                <li><p>Return: true on success, false on failure (e.g., unrecognized type).</p></li>
+                <li>Adds a node place to the map, i.e., a place that falls ON a NODE of the map. 
+                    Note: type must match one of the pre-defined types in the CSS file.</li>
+                <li>Arguments: the x-y coordinates of the start and end, name, title, and description of the place.</li>
+                <li>Return: true on success, false on failure (e.g., unrecognized type).</li>
             </ul>
             <br>
 
             <h3><code>smdInstance.addInfoBox()</code></h3>
             <ul>
-                <li><p>Adds a box to the map to display information about places when clicked on by a user.</p></li>
-                <li><p>Arguments: N/A.</p></li>
-                <li><p>Return: N/A.</p></li>
+                <li>Adds a box to the map to display information about places when clicked on by a user.</li>
+                <li>Arguments: N/A.</li>
+                <li>Return: N/A.</li>
             </ul>
             <br>
 
             <h3><code>smdInstance.addNavigationMenu()</code></h3>
             <ul>
-                <li><p>Adds a navigation menu to the map where the user will be able to plan out route between places.</p></li>
-                <li><p>Arguments: N/A.</p></li>
-                <li><p>Return: N/A.</p></li>
+                <li>Adds a navigation menu to the map where the user will be able to plan out route between places.</li>
+                <li>Arguments: N/A.</li>
+                <li>Return: N/A.</li>
             </ul>
             <br>
 
             <h3><code>smdInstance.addFilterByClassBox()</code></h3>
             <ul>
-                <li><p>API function to add a filter box which will give users the option to filter by certain place type.</p></li>
-                <li><p>Arguments: N/A.</p></li>
-                <li><p>Return: N/A.</p></li>
+                <li>API function to add a filter box which will give users the option to filter by certain place type.</li>
+                <li>Arguments: N/A.</li>
+                <li>Return: N/A.</li>
             </ul>
             <br>
 
             <h3><code>smdInstance.addFilterByNameBox()</code></h3>
             <ul>
-                <li><p>API function to add a filter box which will give users the option to filter by certain place name.</p></li>
-                <li><p>Arguments: N/A.</p></li>
-                <li><p>Return: N/A.</p></li>
+                <li>API function to add a filter box which will give users the option to filter by certain place name.</li>
+                <li>Arguments: N/A.</li>
+                <li>Return: N/A.</li>
             </ul>
             <br>
 
             <h3><code>smdInstance.addLegend()</code></h3>
             <ul>
-                <li><p>API function to add a legend to the map, based on the types of places that are already on the map.</p></li>
-                <li><p>Arguments: N/A.</p></li>
-                <li><p>Return: N/A.</p></li>
+                <li>API function to add a legend to the map, based on the types of places that are already on the map.</li>
+                <li>Arguments: N/A.</li>
+                <li>Return: N/A.</li>
             </ul>
+            <br>
             <hr>
+            <br>
             
             <!-- Place Types -->
             <h1>Place Types</h1>
             <p>Listed below are all the categories of places currently supported.</p>
             <h3>Block Places:</h3>
             <ul>
-                <li>
-                    <div class="blockDemo park"></div>
-                    <p> Park </p>
-                </li>
-                <li>
-                    <div class="blockDemo building"></div>
-                    <p> Building </p>
-                </li>
-                <li>
-                    <div class="blockDemo water"></div>
-                    <p> Water </p>
-                </li>
-                <li>
-                    <div class="blockDemo hospital"></div>
-                    <p> Hospital </p>
-                </li>
+                <li><div class="blockDemo park"></div>Park</li>
+                <li><div class="blockDemo building"></div>Building</li>
+                <li><div class="blockDemo water"></div>Water</li>
+                <li><div class="blockDemo hospital"></div>Hospital</li>
             </ul>
             <br>
 
             <h3>Line Places:</h3>
             <ul>
-                <li>
-                    <div class="lineDemo street"></div>
-                    <p> Street </p>
-                </li>
-                <li>
-                    <div class="lineDemo transitLine"></div>
-                    <p> Transit Line </p>
-                </li>
+                <li><div class="lineDemo street"></div>Street</li>
+                <li><div class="lineDemo transitLine"></div>Transit Line</li>
             </ul>
             <br>
 
             <h3>Node Places:</h3>
             <ul>
-                <li>
-                    <div class="nodeDemo poi"></div>
-                    <p> Point of Interest </p>
-                </li>
-                <li>
-                    <div class="nodeDemo specialEvent"></div>
-                    <p> Special Event </p>
-                </li>
-                <li>
-                    <div class="nodeDemo incident"></div>
-                    <p> Incident </p>
-                </li>
+                <li><div class="nodeDemo poi"></div>Point of Interest</li>
+                <li><div class="nodeDemo specialEvent"></div>Special Event</li>
+                <li><div class="nodeDemo incident"></div>Incident</li>
             </ul>
         </div>
     </body>

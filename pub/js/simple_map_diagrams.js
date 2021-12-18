@@ -29,6 +29,7 @@
         this.id = _id
         _id++
 
+        // do some preliminary setup
         mapSetUp.bind(this)(title, description)
         initializeNodes.bind(this)(this.width, this.height)
     }
@@ -39,6 +40,7 @@
     let _destination = undefined    // global destination - used for navigation
     let _state = 'view'             // global state - used for navigation buttons
     
+    // a global map between places class names, and actual display names
     let _placeTypeMap = new Map()
     _placeTypeMap.set('park', ['Park', 'block'])
     _placeTypeMap.set('building', ['Building', 'block'])
@@ -63,12 +65,12 @@
          * API function to add a connection between the given nodes.
          * 
          * Input: the x-y coordinates of the nodes.
-         * Return: true on success, false on failure (e.g., a diagonal line is given)
+         * Return: true on success, false on failure (e.g., values out of bound)
          */
         addConnection: function(x1, y1, x2, y2) {
             if (!(x1 === x2 || y1 === y2)) return false
+            if (!validator(x1, y2) || !validator(x2, y2)) return false
             addConnection.bind(this)(x1, y1, x2, y2)
-            return true
         },
 
         /***
@@ -76,11 +78,13 @@
          * 
          * Input: a list of the connections to add, in the following form:
          * [[x1, y1, x2, y2], [...], [...], ... ]
-         * Return: true on success, false on failure (e.g., a diagonal line is given)
+         * Return: true on success, false on failure (e.g., values out of bound)
          */
         addMultipleConnections: function(connections) {
             connections.map((element) => {
-                if (!(element[0] === element[2] || element[1] === element[3])) return false
+                const x1 = element[0], y1 = element[1], x2 = element[2], y2 = element[3]
+                if (!(x1 === x2 || y1 === y2)) return false
+            if (!validator(x1, y2) || !validator(x2, y2)) return false
                 addConnection.bind(this)(element[0], element[1], element[2], element[3])
             })
         },
@@ -93,6 +97,9 @@
          * Return: true on success, false on failure (e.g., unrecognized type).
          */
         addBlockPlace: function(x, y, width, height, name, type, description) {
+            if (!validator(x, y) || !validator(width, height)) return false
+            if (x + width >= this.width) return false
+            if (y + height >= this.height) return false
             try {
                 if (_placeTypeMap.get(type)[1] !== 'block') return false
                 const blockPlace = new BlockPlace(x, y, width, height, name, type, description)
@@ -113,6 +120,7 @@
          * Return: true on success, false on failure (e.g., unrecognized type).
          */
         addLinePlace: function(x1, y1, x2, y2, name, type, description) {
+            if (!validator(x1, y1) || !validator(x2, y2)) return false
             try {
                 if (_placeTypeMap.get(type)[1] !== 'line') return false
                 const linePlace = new LinePlace(x1, y1, x2, y2, name, type, description)
@@ -133,6 +141,7 @@
          * Return: true on success, false on failure (e.g., unrecognized type).
          */
         addNodePlace: function(x, y, name, type, description) {
+            if (!validator(x, y)) return false
             try {
                 if (_placeTypeMap.get(type)[1] !== 'node') return false
                 const nodePlace = new NodePlace(x, y, name, type, description)
@@ -268,9 +277,23 @@
             .concat(getAllItemClasses(this.linePlaces)) 
             .concat(getAllItemClasses(this.nodePlaces)), this.id
         )
+
+        // get all the places on the map
         const all_places = this.blockPlaces.concat(this.linePlaces).concat(this.nodePlaces)
-        addFilterMenu.bind(this)(getAllItemClasses(all_places), 'Filter items by type:', all_places, getPlacesByType)
-        addFilterMenu.bind(this)(getAllItemNames(all_places), 'Filter items by name:', all_places, getPlaceByName)
+
+        addFilterMenu.bind(this)(
+            getAllItemClasses(all_places), 
+            'Filter items by type:', 
+            all_places, 
+            getPlacesByType
+            
+        )
+        addFilterMenu.bind(this)(
+            getAllItemNames(all_places), 
+            'Filter items by name:', 
+            all_places, 
+            getPlaceByName
+        )
     }
 
     /***
@@ -362,10 +385,12 @@
     }
 
     /***
-     * Function to find a path between two locations. Uses the Breadth First Search graph algorithm.
+     * Function to find a path between two locations. Uses the Breadth 
+     * First Search graph algorithm.
      * 
      * Input: the x-y coordinates of the start and destination.
-     * Returns: a list of the nodes along the path if a path was found, undefined otherwise.
+     * Returns: a list of the nodes along the path if a path was found, 
+     * undefined otherwise.
      */
     function findShortestPath(x1, y1, x2, y2) {
         // initialization
@@ -387,13 +412,13 @@
                 return ret
             }
             // look at surrounding neighbours
-            for (let i = 0; i < u.neighbours.length; i++) {
-                if (u.neighbours[i].visited === false) {
-                    u.neighbours[i].visited = true
-                    u.neighbours[i].parent = u
-                    queue.push(u.neighbours[i])
+            u.neighbours.map((neighbour) => {
+                if (neighbour.visited === false) {
+                    neighbour.visited = true
+                    neighbour.parent = u
+                    queue.push(neighbour)
                 }
-            }
+            })
         }
     }
 
@@ -403,19 +428,37 @@
      */
     function clearNavigation() {
         // clear the tree structure
-        for (let i = 0; i < this.width; i++) {
-            for (let j = 0; j < this.height; j++) {
-                this.nodes[i][j].visited = false
-                this.nodes[i][j].parent = null
-            }
-        }
+        this.nodes.map((column) => {
+            column.map((node) => {
+                node.visited = false
+                node.parent = null
+            })
+        })
+
         // reset the labels and delete the path that was drawn
         const navigationContainer = document.getElementById(this.id + '.navigationContainer')
-        navigationContainer.textContent = ''
         const srcLabel = document.getElementById(this.id + '.srcLabel')
         const destLabel = document.getElementById(this.id + '.destLabel')
-        srcLabel.textContent = 'Click on the "Choose starting point" button below and then click on a place on the map to mark as the start point.'
-        destLabel.textContent = 'Click on the "Choose destination" button below and then click on a place on the map to mark as the destination.'
+
+        navigationContainer.textContent = ''
+        srcLabel.textContent = 
+            'Click on the "Choose starting point" button below and then \
+            click on a place on the map to mark as the start point.'
+        destLabel.textContent = 
+            'Click on the "Choose destination" button below and then \
+            click on a place on the map to mark as the destination.'
+    }
+
+    /***
+     * Function to validate coordinates.
+     * 
+     * Input: the x-y coordinates.
+     * Return: true if valid, false otherwise.
+     */
+    function validator(x, y) {
+        if (x < 0 || x >= this.width) return false
+        if (y < 0 || y >= this.height) return false
+        return true
     }
 
     /*** DOM manipulation functions ***/
@@ -438,14 +481,15 @@
         // create a title and subtitle along with a container for them
         const titleContainer = document.createElement('div')
         const titleElement = document.createElement('h2')
-        titleElement.append(document.createTextNode(title))
         const subtitle = document.createElement('label')
+
         subtitle.className = 'controlLabel'
-        subtitle.append(document.createTextNode(description))
-        titleContainer.id = this.id + '.titleContainer'
         titleContainer.className = 'titleContainer'
-        titleContainer.append(titleElement)
-        titleContainer.append(subtitle)
+        titleContainer.id = this.id + '.titleContainer'
+
+        titleContainer.append(titleElement, subtitle)
+        titleElement.append(document.createTextNode(title))
+        subtitle.append(document.createTextNode(description))
         container.append(titleContainer)
 
         // create a container for the map
@@ -472,18 +516,14 @@
 
         // create container for the places
         const blockPlaces = document.createElement('div')
-        blockPlaces.id = this.id + '.blockPlacesContainer'
         const linePlaces = document.createElement('div')
-        linePlaces.id = this.id + '.linePlacesContainer'
         const nodePlaces = document.createElement('div')
+        blockPlaces.id = this.id + '.blockPlacesContainer'
+        linePlaces.id = this.id + '.linePlacesContainer'
         nodePlaces.id = this.id + '.nodePlacesContainer'
 
         // add to the main map container
-        map.append(nodes)
-        map.append(connections)
-        map.append(blockPlaces)
-        map.append(linePlaces)
-        map.append(nodePlaces)
+        map.append(nodes, connections, blockPlaces, linePlaces, nodePlaces)
 
         // create a container for the control menus
         const controlCentre = document.createElement('div')
@@ -507,15 +547,14 @@
 
         // labels to display information
         const infoLabel = document.createElement('h4')
-        infoLabel.id = this.id + '.selectedLabel'
-        infoLabel.append(document.createTextNode('Click an item to start.'))
         const descriptionLabel = document.createElement('label')
+        infoLabel.id = this.id + '.selectedLabel'
+        infoLabel.append(document.createTextNode('Click an item to start.'))   
         descriptionLabel.id = this.id + '.descLabel'
         descriptionLabel.className = 'controlLabel'
-        controlBox.append(infoLabel)
-        controlBox.append(descriptionLabel)
 
         // add to the document
+        controlBox.append(infoLabel, descriptionLabel)
         mapContainer.append(controlBox)
     }
 
@@ -529,21 +568,27 @@
 
         // labels to display information
         const navLabel = document.createElement('h4')
-        navLabel.append(document.createTextNode('Navigation Menu'))
         const list = document.createElement('ul')
-        list.className = 'SMDlist'
         const srcLabel = document.createElement('li')
+        const destLabel = document.createElement('li')
+
+        navLabel.append(document.createTextNode('Navigation Menu'))
+        list.className = 'SMDlist'
+        
         srcLabel.id = this.id + '.srcLabel'
         srcLabel.className = 'controlLabel'
-        srcLabel.append(document.createTextNode('Click on the "Choose starting point" button below and then click on a place on the map to mark as the start point.'))
-        const destLabel = document.createElement('li')
+        srcLabel.append(document.createTextNode(
+            'Click on the "Choose starting point" button below and then \
+            click on a place on the map to mark as the start point.'))
+        
         destLabel.id = this.id + '.destLabel'
         destLabel.className = 'controlLabel'
-        destLabel.append(document.createTextNode('Click on the "Choose destination" button below and then click on a place on the map to mark as the destination.'))
-        list.append(srcLabel)
-        list.append(destLabel)
-        navigationBox.append(navLabel)
-        navigationBox.append(list)
+        destLabel.append(document.createTextNode(
+            'Click on the "Choose destination" button below and then \
+            click on a place on the map to mark as the destination.'))
+        
+        list.append(srcLabel, destLabel)
+        navigationBox.append(navLabel, list)
 
         // button to mark the source
         const srcButton = document.createElement('button')
@@ -620,8 +665,7 @@
                 node.style.left = i * 50 + 50 + 'px'
                 node.style.top = j * 50 + 50 + 'px'
                 node.id = this.id + '.sn.' + i + '.' + j
-                node.classList.add('node')
-                node.classList.add('invisibleIntersection')
+                node.classList.add('node', 'invisibleIntersection')
                 this.nodes[i][j] = {
                     id: node.id,
                     neighbours: [],     // these fields are used for BFS
@@ -630,8 +674,8 @@
                     x: i,
                     y: j
                 }
-                item.appendChild(node)
-                column.appendChild(item)
+                item.append(node)
+                column.append(item)
                 node.addEventListener('click', () => {
                     if (_state === 'selectSrc') {
                         const srcLabel = document.getElementById(this.id + '.srcLabel')
@@ -654,6 +698,7 @@
      * Input: the x-y coordinates of both nodes.
      */
     function addConnection(x1, y1, x2, y2) {
+        // create an element and add it to the document
         const connectionsContainer = document.getElementById(this.id + '.connectionsContainer')
         const line = document.createElement('div')
         line.classList.add('line')
@@ -663,38 +708,26 @@
         let width = 5;
         if (x1 !== x2) {
             width = ((x2 - x1) * 50)
-            document.getElementById(this.nodes[x1][y1].id).classList.add('node')
-            document.getElementById(this.nodes[x2][y1].id).classList.add('node')
-            document.getElementById(this.nodes[x1][y1].id).classList.add('intersection')
-            document.getElementById(this.nodes[x2][y1].id).classList.add('intersection')
+            document.getElementById(this.nodes[x1][y1].id).classList.add('node', 'intersection')
+            document.getElementById(this.nodes[x2][y1].id).classList.add('node', 'intersection')
         }
         
         // determine the height of the connection line and add intersections along the way
         let height = 5;
         if (y1 !== y2) {
             height = ((y2 - y1) * 50)
-            document.getElementById(this.nodes[x1][y1].id).classList.add('node')
-            document.getElementById(this.nodes[x1][y2].id).classList.add('node')
-            document.getElementById(this.nodes[x1][y1].id).classList.add('intersection')
-            document.getElementById(this.nodes[x1][y2].id).classList.add('intersection')
+            document.getElementById(this.nodes[x1][y1].id).classList.add('node', 'intersection')
+            document.getElementById(this.nodes[x1][y2].id).classList.add('node', 'intersection')
         }
 
         // update the neighbours between the two nodes
         for (let i = x1; i <= x2; i++) {
-            if (i > 0) {
-                this.nodes[i][y1].neighbours.push(this.nodes[i-1][y1])
-            }
-            if (i < x2) {
-                this.nodes[i][y1].neighbours.push(this.nodes[i+1][y1])
-            }
+            if (i > 0) this.nodes[i][y1].neighbours.push(this.nodes[i-1][y1])
+            if (i < x2) this.nodes[i][y1].neighbours.push(this.nodes[i+1][y1])
         }
         for (let i = y1; i <= y2; i++) {
-            if (i > 0) {
-                this.nodes[x1][i].neighbours.push(this.nodes[x1][i-1])
-            }
-            if (i < y2) {
-                this.nodes[x1][i].neighbours.push(this.nodes[x1][i+1])
-            }
+            if (i > 0) this.nodes[x1][i].neighbours.push(this.nodes[x1][i-1])
+            if (i < y2) this.nodes[x1][i].neighbours.push(this.nodes[x1][i+1])
         }
 
         // create the element and add it to the document
@@ -717,8 +750,7 @@
         // create the block place based on the given information and add to document
         const block = document.createElement('div')
         block.id = blockPlace.getID(this.id)
-        block.classList.add('block')
-        block.classList.add(blockPlace.class)
+        block.classList.add('block', blockPlace.class)
         block.style.width = (blockPlace.width * 50 - 5) + 'px'
         block.style.height = (blockPlace.height * 50 - 5) + 'px'
         block.style.left = (blockPlace.x * 50 + 60) + 'px'
@@ -727,13 +759,12 @@
 
         // add a label
         const label = document.createElement('label')
-        label.appendChild(document.createTextNode(blockPlace.name))
         label.className = 'placeLabel'
+        label.append(document.createTextNode(blockPlace.name))
         block.append(label)
 
         // look for free place to put the label
-        let tmp_x = blockPlace.x
-        let tmp_y = blockPlace.y
+        let tmp_x = blockPlace.x, tmp_y = blockPlace.y
         while (this.labelSpots.includes(tmp_x + '.' + tmp_y) && tmp_y <= blockPlace.height) {
             if (tmp_x - blockPlace.x >= blockPlace.width) {
                 tmp_y++
@@ -771,12 +802,8 @@
 
         // when the place is hovered over, make the text bold
         const element = document.getElementById(blockPlace.getID(this.id))
-        block.addEventListener('mouseover', function(e) {
-            element.classList.add('hoverOver')
-        })
-        block.addEventListener('mouseleave', function(e) {
-            element.classList.remove('hoverOver')
-        })
+        block.addEventListener('mouseover', () => { element.classList.add('hoverOver') })
+        block.addEventListener('mouseleave', () => { element.classList.remove('hoverOver') })
     }
 
     /***
@@ -791,20 +818,15 @@
         // create the line place based on the given information and add to document
         const line = document.createElement('div')
         line.id = linePlace.getID(this.id)
-        line.classList.add('line')
-        line.classList.add(linePlace.class)
+        line.classList.add('line', linePlace.class)
 
         // determine the width of the line
         let width = 5;
-        if (linePlace.x1 !== linePlace.x2) {
-            width = ((linePlace.x2 - linePlace.x1) * 50)
-        }
+        if (linePlace.x1 !== linePlace.x2) width = ((linePlace.x2 - linePlace.x1) * 50)
         
         // determine the height of the line
         let height = 5;
-        if (linePlace.y1 !== linePlace.y2) {
-            height = ((linePlace.y2 - linePlace.y1) * 50)
-        }
+        if (linePlace.y1 !== linePlace.y2) height = ((linePlace.y2 - linePlace.y1) * 50)
 
         // create the element
         line.style.width = width + 'px'
@@ -815,14 +837,13 @@
 
         // add a label
         const label = document.createElement('label')
-        label.appendChild(document.createTextNode(linePlace.name))
+        label.append(document.createTextNode(linePlace.name))
         label.className = ('placeLabel')
         line.append(label)
 
         // look for free place to put the label
         const coordinates = searchPreliminaryLocations.bind(this)(linePlace.x1, linePlace.x2)
-        let tmp_x = linePlace.x1
-        let tmp_y = linePlace.x2
+        let tmp_x = linePlace.x1, tmp_y = linePlace.x2
         if (coordinates === null) {
             while (this.labelSpots.includes(tmp_x + '.' + tmp_y) && tmp_y <= (linePlace.y2 - linePlace.y1)) {
                 if (tmp_x - linePlace.x1 >= linePlace.x2 - linePlace.x1) {
@@ -858,12 +879,8 @@
 
         // when the place is hovered over, make the text bold
         const element = document.getElementById(linePlace.getID(this.id))
-        line.addEventListener('mouseover', function(e) {
-            element.classList.add('hoverOver')
-        })
-        line.addEventListener('mouseleave', function(e) {
-            element.classList.remove('hoverOver')
-        })
+        line.addEventListener('mouseover', () => { element.classList.add('hoverOver') })
+        line.addEventListener('mouseleave', () => { element.classList.remove('hoverOver') })
     }
 
     /***
@@ -883,8 +900,7 @@
         // determine placement
         node.style.left = nodePlace.x * 50 + 50 + 'px'
         node.style.top = nodePlace.y * 50 + 50 + 'px'
-        node.classList.add('node')
-        node.classList.add(nodePlace.class)
+        node.classList.add('node', nodePlace.class)
         nodePlacesContainer.append(node)
         
         // add a label
@@ -895,8 +911,7 @@
 
         // look for free place to put the label
         const coordinates = searchPreliminaryLocations.bind(this)(nodePlace.x, nodePlace.y)
-        let tmp_x = coordinates[0]
-        let tmp_y = coordinates[1]
+        let tmp_x = coordinates[0], tmp_y = coordinates[1]
         this.labelSpots.push(tmp_x + '.' + tmp_y)
         label.style.left = (tmp_x - nodePlace.x) * 50 + 'px'
         label.style.top = (tmp_y - nodePlace.y) * 50 + 'px'
@@ -926,12 +941,8 @@
 
         // when the place is hovered over, make the text bold
         const element = document.getElementById(nodePlace.getID(this.id))
-        node.addEventListener('mouseover', function(e) {
-            element.classList.add('hoverOver')
-        })
-        node.addEventListener('mouseleave', function(e) {
-            element.classList.remove('hoverOver')
-        })
+        node.addEventListener('mouseover', () => { element.classList.add('hoverOver') })
+        node.addEventListener('mouseleave', () => { element.classList.remove('hoverOver') })
     }
 
     /* function to toggle highlight on a block place with given id */
@@ -969,16 +980,14 @@
             const row = document.createElement('tr')
             const iconCell = document.createElement('td')
             const labelCell = document.createElement('td')
-            row.append(iconCell)
-            row.append(labelCell)
+            row.append(iconCell, labelCell)
 
             const name = _placeTypeMap.get(element)[0]
             const type = _placeTypeMap.get(element)[1]
 
             // add a mini icon
             const icon = document.createElement('div')
-            icon.classList.add(type + 'Icon')
-            icon.classList.add(element)
+            icon.classList.add(type + 'Icon', element)
             icon.id = this.id + '.' + type + '.' + element
             iconCell.append(icon)
             list.append(row)
@@ -992,9 +1001,7 @@
         }
 
         // add all types of elements to the legend
-        places.map((element) => {
-            createLegendRow(element)
-        })
+        places.map((element) => { createLegendRow(element) })
     }
 
     /***
@@ -1028,8 +1035,7 @@
             list.append(item)
         })
         const submitButton = document.createElement('button')
-        submitButton.classList.add('SMDbutton')
-        submitButton.classList.add('submitButton')
+        submitButton.classList.add('SMDbutton', 'submitButton')
         submitButton.append(document.createTextNode('OK'))
         submitButton.addEventListener('click', () => {
             const elements = elementGetter.bind(this)(list.value, places)
@@ -1039,7 +1045,6 @@
             })
         })
         filterBox.append(submitButton)
-        
     }
 
     /***
@@ -1052,46 +1057,36 @@
         const navigationContainer = document.getElementById(this.id + '.navigationContainer')
         const source = document.createElement('div')
         source.id = this.id + 'source'
+        source.classList.add('node', 'navigationEndPoint')
         source.style.left = path[0].x * 50 + 50 + 'px'
         source.style.top = path[0].y * 50 + 50 + 'px'
-        source.classList.add('node')
-        source.classList.add('navigationEndPoint')
         source.style.zIndex = 5
-        navigationContainer.append(source)
 
         // draw destination
         const dest = document.createElement('div')
         dest.id = this.id + 'dest'
+        dest.classList.add('node', 'navigationEndPoint')
         dest.style.left = path[path.length-1].x * 50 + 50 + 'px'
         dest.style.top = path[path.length-1].y * 50 + 50 + 'px'
-        dest.classList.add('node')
-        dest.classList.add('navigationEndPoint')
         dest.style.zIndex = 5
-        navigationContainer.append(dest)
+
+        navigationContainer.append(source, dest)
         
         for (let i = 1; i < path.length; i++) {
             // get the x-y coordinates of the two nodes to connect
-            const x1 = path[i - 1].x
-            const y1 = path[i - 1].y
-            const x2 = path[i].x
-            const y2 = path[i].y
+            const x1 = path[i - 1].x, y1 = path[i - 1].y, x2 = path[i].x,  y2 = path[i].y
 
             // draw a path between them
             const line = document.createElement('div')
-            line.classList.add('line')
-            line.classList.add('path')
+            line.classList.add('line', 'path')
 
             // determine the width of the connection line
             let width = 7;
-            if (x1 !== x2) {
-                width = (Math.abs(x2 - x1) * 50 + 5)
-            }
+            if (x1 !== x2) width = (Math.abs(x2 - x1) * 50 + 5)
             
             // determine the height of the connection line
             let height = 7;
-            if (y1 !== y2) {
-                height = (Math.abs(y2 - y1) * 50 + 5)
-            }
+            if (y1 !== y2) height = (Math.abs(y2 - y1) * 50 + 5)
 
             // create the element and add to the document
             line.style.width = width + 'px'

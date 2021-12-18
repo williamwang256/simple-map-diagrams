@@ -7,7 +7,7 @@
      * 
      * Input: the dimentions of the map, and the id of the container for it.
      */
-    function SimpleMapDiagram(width, height, container) {
+    function SimpleMapDiagram(width, height, title, description, container) {
         this.nodes = []             // list to store the nodes
 
         // determine the container in which to put this SMD instance - either the
@@ -28,6 +28,9 @@
         // unique identifier; incremented every time a SMD is created
         this.id = _id
         _id++
+
+        mapSetUp.bind(this)(title, description)
+        initializeNodes.bind(this)(this.width, this.height)
     }
 
     // some global (private) variables
@@ -50,29 +53,10 @@
     SimpleMapDiagram.prototype = {
 
         /***
-         * API function to do the fundamental setup of the map.
-         * 
-         * Input: the title and description of the map.
-         */
-        setUp: function(title, description) {
-            mapSetUp.bind(this)(title, description)
-            initializeNodes.bind(this)(this.width, this.height)
-        },
-
-        /***
          * API function to do the default setup. Includes all availible menus.
          */
         defaultSetUp: function() {
-            initializeInfoBox.bind(this)()
-            initializeNavigationMenu.bind(this)()
-            addLegend.bind(this)(
-                getAllItemClasses(this.blockPlaces)
-                .concat(getAllItemClasses(this.linePlaces)) 
-                .concat(getAllItemClasses(this.nodePlaces)), this.id
-            )
-            const all_places = this.blockPlaces.concat(this.linePlaces).concat(this.nodePlaces)
-            addFilterMenu.bind(this)(getAllItemClasses(all_places), 'Filter items by type:', all_places, getPlacesByType)
-            addFilterMenu.bind(this)(getAllItemNames(all_places), 'Filter items by name:', all_places, getPlaceByName)
+            defaultInitialize.bind(this)()
         },
 
         /***
@@ -96,6 +80,7 @@
          */
         addMultipleConnections: function(connections) {
             connections.map((element) => {
+                if (!(element[0] === element[2] || element[1] === element[3])) return false
                 addConnection.bind(this)(element[0], element[1], element[2], element[3])
             })
         },
@@ -165,7 +150,6 @@
          */
         addInfoBox: function() {
             initializeInfoBox.bind(this)()
-            
         },
 
         /***
@@ -272,6 +256,22 @@
     }
 
     /*** Helper functions ***/
+
+    /***
+     * Function to perform default set up tasks.
+     */
+    function defaultInitialize() {
+        initializeInfoBox.bind(this)()
+        initializeNavigationMenu.bind(this)()
+        addLegend.bind(this)(
+            getAllItemClasses(this.blockPlaces)
+            .concat(getAllItemClasses(this.linePlaces)) 
+            .concat(getAllItemClasses(this.nodePlaces)), this.id
+        )
+        const all_places = this.blockPlaces.concat(this.linePlaces).concat(this.nodePlaces)
+        addFilterMenu.bind(this)(getAllItemClasses(all_places), 'Filter items by type:', all_places, getPlacesByType)
+        addFilterMenu.bind(this)(getAllItemNames(all_places), 'Filter items by name:', all_places, getPlaceByName)
+    }
 
     /***
      * Function to return a list of all places of a certain class. 
@@ -414,8 +414,8 @@
         navigationContainer.textContent = ''
         const srcLabel = document.getElementById(this.id + '.srcLabel')
         const destLabel = document.getElementById(this.id + '.destLabel')
-        srcLabel.textContent = 'Select a place to mark as starting point.'
-        destLabel.textContent = 'Select a place to mark as destination.'
+        srcLabel.textContent = 'Click on the "Choose starting point" button below and then click on a place on the map to mark as the start point.'
+        destLabel.textContent = 'Click on the "Choose destination" button below and then click on a place on the map to mark as the destination.'
     }
 
     /*** DOM manipulation functions ***/
@@ -462,17 +462,6 @@
         map.style.width = (this.width * 50 + 60) + 'px'
         mapContainer.append(map)
 
-        // create some buttons on the map (clear all button, etc.)
-        const clearButton = document.createElement('button')
-        clearButton.classList.add('SMDbutton')
-        clearButton.append(document.createTextNode('Clear all'))
-        mapContainer.append(clearButton)
-        clearButton.classList.add('mapButton')
-        clearButton.addEventListener('click', () => {
-            clearAllHighlights.bind(this)()
-            clearNavigation.bind(this)()
-        })
-        
         // create a container for the nodes
         const nodes = document.createElement('div')
         nodes.id = this.id + '.nodes'
@@ -540,17 +529,17 @@
 
         // labels to display information
         const navLabel = document.createElement('h4')
-        navLabel.append(document.createTextNode('Navigation'))
+        navLabel.append(document.createTextNode('Navigation Menu'))
         const list = document.createElement('ul')
         list.className = 'SMDlist'
         const srcLabel = document.createElement('li')
         srcLabel.id = this.id + '.srcLabel'
         srcLabel.className = 'controlLabel'
-        srcLabel.append(document.createTextNode('Select a place to mark as starting point.'))
+        srcLabel.append(document.createTextNode('Click on the "Choose starting point" button below and then click on a place on the map to mark as the start point.'))
         const destLabel = document.createElement('li')
         destLabel.id = this.id + '.destLabel'
         destLabel.className = 'controlLabel'
-        destLabel.append(document.createTextNode('Select a place to mark as destination.'))
+        destLabel.append(document.createTextNode('Click on the "Choose destination" button below and then click on a place on the map to mark as the destination.'))
         list.append(srcLabel)
         list.append(destLabel)
         navigationBox.append(navLabel)
@@ -597,6 +586,17 @@
                 _destination = undefined
                 _state = 'view'
             }
+        })
+
+        // create some buttons on the map (clear all button, etc.)
+        const clearButton = document.createElement('button')
+        clearButton.classList.add('SMDbutton')
+        clearButton.append(document.createTextNode('Clear all'))
+        mapContainer.insertBefore(clearButton, mapContainer.firstChild)
+        clearButton.classList.add('mapButton')
+        clearButton.addEventListener('click', () => {
+            clearAllHighlights.bind(this)()
+            clearNavigation.bind(this)()
         })
 
         // add to the document

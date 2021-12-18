@@ -3,8 +3,14 @@
 "use strict";
 
 // initialization
-const e1_smd = new SimpleMapDiagram(10, 5, 'example1')
-e1_smd.setUp('Main Campus Map', 'This is a sample use case of the Simple Map Diagrams library, demonstrating a campus map.')
+const e1_smd = new SimpleMapDiagram(
+    10, 
+    5,
+    'Main Campus Map', 
+    'This is a sample use case of the Simple Map Diagrams library, demonstrating a campus map.',
+    'example1',
+    true
+)
 
 // add some connections
 e1_smd.addMultipleConnections([

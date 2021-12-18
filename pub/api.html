@@ -36,14 +36,14 @@
             <ul>
                 <li>
                     <p>
-                        The first thing you will need to do is to load the <code>simple_map_diagrams.js</code> script 
+                        The first thing you will need to do is to load the <code class="inlineCode">simple_map_diagrams.js</code> script 
                         into the HTML file of your webpage. It includes the code for the core functionality of the 
                         Simple Map Diagrams Library that is required before you can start using it.
                     </p>
                 </li>
                 <li>
                     <p>
-                        Next, the <code>simple_map_diagrams.css</code> file needs to be linked into the HTML file.
+                        Next, the <code class="inlineCode">simple_map_diagrams.css</code> file needs to be linked into the HTML file.
                         It provides all the styling used by the Simple Map Diagrams library.
                     </p>
                 </li>
@@ -58,7 +58,7 @@
                 Now that you have the Simple Map Diagrams code loaded in, you can start adding maps to you webpage!
                 In a separate script, you may instantiate and set up an instance of Simple Map Diagram as follows:
             </p>
-            <code>
+            <code class="inlineCode">
                 const smd = new SimpleMapDiagram(10, 5, 'sample title', 'sample description', 'example1') <br>
             </code>
             <p>
@@ -74,7 +74,7 @@
             <!-- API List -->
             <h1>List of API Functions</h1>
 
-            <h3><code>smdInstance.defaultSetUp()</code></h3>
+            <h3><code class="inlineCode">smdInstance.defaultSetUp()</code></h3>
             <ul>
                 <li>Completes a default setup of the map diagram, including all available features.
                     Note: must be called after creating all places on the map that are to be included.</li>
@@ -83,7 +83,7 @@
             </ul>
             <br>
 
-            <h3><code>smdInstance.addConnection(x1, y1, x2, y2)</code></h3>
+            <h3><code class="inlineCode">smdInstance.addConnection(x1, y1, x2, y2)</code></h3>
             <ul>
                 <li>Adds a connection between the nodes represented by the two given points.</li>
                 <li>Arguments: the x-y coordinates of the two points to connect.</li>
@@ -91,7 +91,7 @@
             </ul>
             <br>
 
-            <h3><code>smdInstance.addMultipleConnections(connections)</code></h3>
+            <h3><code class="inlineCode">smdInstance.addMultipleConnections(connections)</code></h3>
             <ul>
                 <li>Adds add multiple connections to the graph at once.</li>
                 <li>Arguments: a list of the connections to add, in the following form: 
@@ -100,7 +100,7 @@
             </ul>
             <br>
 
-            <h3><code>smdInstance.addBlockPlace(x, y, width, height, type, name, description)</code></h3>
+            <h3><code class="inlineCode">smdInstance.addBlockPlace(x, y, width, height, type, name, description)</code></h3>
             <ul>
                 <li>Adds a block place to the map, i.e., a place that falls BETWEEN the connections on the map. 
                     Note: type must match one of the pre-defined types in the CSS file.</li>
@@ -109,7 +109,7 @@
             </ul>
             <br>
 
-            <h3><code>smdInstance.addLinePlace(x1, y1, x2, y2, type, name, description)</code></h3>
+            <h3><code class="inlineCode">smdInstance.addLinePlace(x1, y1, x2, y2, type, name, description)</code></h3>
             <ul>
                 <li>Adds a line place to the map, i.e., a place that falls ON a connection on the map. 
                     Note: type must match one of the pre-defined types in the CSS file.</li>
@@ -118,7 +118,7 @@
             </ul>
             <br>
 
-            <h3><code>smdInstance.addNodePlace(x, y, type, name, description)</code></h3>
+            <h3><code class="inlineCode">smdInstance.addNodePlace(x, y, type, name, description)</code></h3>
             <ul>
                 <li>Adds a node place to the map, i.e., a place that falls ON a NODE of the map. 
                     Note: type must match one of the pre-defined types in the CSS file.</li>
@@ -127,7 +127,7 @@
             </ul>
             <br>
 
-            <h3><code>smdInstance.addInfoBox()</code></h3>
+            <h3><code class="inlineCode">smdInstance.addInfoBox()</code></h3>
             <ul>
                 <li>Adds a box to the map to display information about places when clicked on by a user.</li>
                 <li>Arguments: N/A.</li>
@@ -135,7 +135,7 @@
             </ul>
             <br>
 
-            <h3><code>smdInstance.addNavigationMenu()</code></h3>
+            <h3><code class="inlineCode">smdInstance.addNavigationMenu()</code></h3>
             <ul>
                 <li>Adds a navigation menu to the map where the user will be able to plan out route between places.</li>
                 <li>Arguments: N/A.</li>
@@ -143,7 +143,7 @@
             </ul>
             <br>
 
-            <h3><code>smdInstance.addFilterByClassBox()</code></h3>
+            <h3><code class="inlineCode">smdInstance.addFilterByClassBox()</code></h3>
             <ul>
                 <li>API function to add a filter box which will give users the option to filter by certain place type.</li>
                 <li>Arguments: N/A.</li>
@@ -151,7 +151,7 @@
             </ul>
             <br>
 
-            <h3><code>smdInstance.addFilterByNameBox()</code></h3>
+            <h3><code class="inlineCode">smdInstance.addFilterByNameBox()</code></h3>
             <ul>
                 <li>API function to add a filter box which will give users the option to filter by certain place name.</li>
                 <li>Arguments: N/A.</li>
@@ -159,7 +159,7 @@
             </ul>
             <br>
 
-            <h3><code>smdInstance.addLegend()</code></h3>
+            <h3><code class="inlineCode">smdInstance.addLegend()</code></h3>
             <ul>
                 <li>API function to add a legend to the map, based on the types of places that are already on the map.</li>
                 <li>Arguments: N/A.</li>

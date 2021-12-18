@@ -4,7 +4,7 @@
 
 // initialization
 const e1_smd = new SimpleMapDiagram(10, 5, 'Main Campus Map', 
-    'This is a sample use case of the Simple Map Diagrams library, demonstrating a campus map.',
+    'University of Simple Map Diagrams Campus Map. Click around for ongoing events and information!',
     'example1')
 
 // add some connections

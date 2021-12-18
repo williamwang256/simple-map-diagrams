@@ -1,12 +1,10 @@
-/* SMD landing page css */
+/* SMD demonstration pages CSS */
 
 body {
 	margin:0; 
 	font-family: Futura, sans-serif; 
 	height: 100%;
 }
-
-
 
 .container {
 	margin-left: 50px;
@@ -58,6 +56,8 @@ body {
 	color: #669df6;
 }
 
+/* Code demonstration CSS */
+
 .codeSnippet {
 	background-color: #eeeeee;
 	color: #888888;
@@ -72,7 +72,7 @@ body {
 	color: #888888;
 }
 
-/* landing page css */
+/* Home Page CSS */
 
 #landingPageBody {
 	background-color: rgb(229, 234, 240);
@@ -127,7 +127,7 @@ body {
 	padding: 10px;
 }
 
-/* API page css */
+/* API page CSS */
 
 .blockDemo {
     width: 20px;

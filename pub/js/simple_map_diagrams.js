@@ -68,8 +68,16 @@
          * Return: true on success, false on failure (e.g., values out of bound)
          */
         addConnection: function(x1, y1, x2, y2) {
-            if (!(x1 === x2 || y1 === y2)) return false
-            if (!validator(x1, y2) || !validator(x2, y2)) return false
+            // validate input to API function given by developer
+            const invalid = 
+                !(x1 === x2 || y1 === y2) || 
+                !validator.bind(this)(x1, y2) || 
+                !validator.bind(this)(x2, y2)
+            if (invalid) {
+                console.log('Invalid coordinates')
+                return false
+            }
+            // add the connection
             addConnection.bind(this)(x1, y1, x2, y2)
         },
 
@@ -82,9 +90,17 @@
          */
         addMultipleConnections: function(connections) {
             connections.map((element) => {
+                // validate input to API function given by developer
                 const x1 = element[0], y1 = element[1], x2 = element[2], y2 = element[3]
-                if (!(x1 === x2 || y1 === y2)) return false
-            if (!validator(x1, y2) || !validator(x2, y2)) return false
+                const invalid = 
+                    !(x1 === x2 || y1 === y2) || 
+                    !validator.bind(this)(x1, y1) || 
+                    !validator.bind(this)(x2, y2)
+                if (invalid) {
+                    console.log('Could not add connection: invalid coordinates')
+                    return false
+                }
+                // add the connection
                 addConnection.bind(this)(element[0], element[1], element[2], element[3])
             })
         },
@@ -97,11 +113,26 @@
          * Return: true on success, false on failure (e.g., unrecognized type).
          */
         addBlockPlace: function(x, y, width, height, type, name, description) {
-            if (!validator(x, y) || !validator(width, height)) return false     // validate input
-            if (x + width >= this.width) return false
-            if (y + height >= this.height) return false
+            // validate input to API function given by developer
+            const invalid = 
+                !validator.bind(this)(x, y) || 
+                !validator.bind(this)(width, height) ||
+                x + width >= this.width
+                y + height >= this.height
+            if (invalid) {
+                console.log('Could not add place: invalid coordinates')
+                return false
+            }
+            
+            // if no name or description given, use empty string
+            name = (name !== undefined) ? name : ''
+            description = (description !== undefined) ? description : ''
+
             try {
-                if (_placeTypeMap.get(type)[1] !== 'block') return false        // unrecognized type
+                if (_placeTypeMap.get(type)[1] !== 'block') {
+                    console.log('Could not add place: unrecognized place type.')
+                    return false        
+                }
                 const blockPlace = new BlockPlace(x, y, width, height, type, name, description)
                 createBlockPlace.bind(this)(blockPlace)
                 this.blockPlaces.push(blockPlace)
@@ -119,9 +150,22 @@
          * Return: true on success, false on failure (e.g., unrecognized type).
          */
         addLinePlace: function(x1, y1, x2, y2, type, name, description) {
-            if (!validator(x1, y1) || !validator(x2, y2)) return false      // validate input
+            // validate input to API function given by developer
+            const invalid = !validator.bind(this)(x1, y1) || !validator.bind(this)(x2, y2)
+            if (invalid) {
+                console.log('Could not add place: invalid coordinates.')
+                return false
+            }
+            
+            // if no name or description given, use empty string
+            name = (name !== undefined) ? name : ''
+            description = (description !== undefined) ? description : ''
+
             try {
-                if (_placeTypeMap.get(type)[1] !== 'line') return false     // unrecognized type
+                if (_placeTypeMap.get(type)[1] !== 'line') {
+                    console.log('Could not add place: unrecognized place type.')
+                    return false        
+                }
                 const linePlace = new LinePlace(x1, y1, x2, y2, type, name, description)
                 createLinePlace.bind(this)(linePlace)
                 this.linePlaces.push(linePlace)
@@ -139,9 +183,21 @@
          * Return: true on success, false on failure (e.g., unrecognized type).
          */
         addNodePlace: function(x, y, type, name, description) {
-            if (!validator(x, y)) return false
+            // validate input to API function given by developer
+            if (!validator.bind(this)(x, y)) {
+                console.log('Could not add place: invalid coordinates.')
+                return false
+            }
+
+            // if no name or description given, use empty string
+            name = (name !== undefined) ? name : ''
+            description = (description !== undefined) ? description : ''
+
             try {
-                if (_placeTypeMap.get(type)[1] !== 'node') return false
+                if (_placeTypeMap.get(type)[1] !== 'node') {
+                    console.log('Could not add place: unrecognized place type.')
+                    return false        
+                }
                 const nodePlace = new NodePlace(x, y, type, name, description)
                 createNodePlace.bind(this)(nodePlace)
                 this.nodePlaces.push(nodePlace)
@@ -426,8 +482,7 @@
      * Returns: the x-y coordinate of a free space if found, null otherwise.
      */
     function searchPreliminaryLocations(x, y) {
-        let tmp_x = x
-        let tmp_y = y
+        let tmp_x = x, tmp_y = y
         if (!this.labelSpots.includes(tmp_x + '.' + tmp_y)) {
             // nothing to do here
         } else if (!this.labelSpots.includes((tmp_x - 1) + '.' - tmp_y)) {
@@ -812,25 +867,27 @@
         block.style.top = (blockPlace.y * 50 + 60) + 'px'
         blockPlacesContainer.append(block)
 
-        // add a label
-        const label = document.createElement('label')
-        label.className = 'placeLabel'
-        label.append(document.createTextNode(blockPlace.name))
-        block.append(label)
+        if (blockPlace.name !== '') {
+            // add a label
+            const label = document.createElement('label')
+            label.className = 'placeLabel'
+            label.append(document.createTextNode(blockPlace.name))
+            block.append(label)
 
-        // look for free place to put the label
-        let tmp_x = blockPlace.x, tmp_y = blockPlace.y
-        while (this.labelSpots.includes(tmp_x + '.' + tmp_y) && tmp_y <= blockPlace.height) {
-            if (tmp_x - blockPlace.x >= blockPlace.width) {
-                tmp_y++
-                tmp_x = blockPlace.x
-            } else {
-                tmp_x++
+            // look for free place to put the label
+            let tmp_x = blockPlace.x, tmp_y = blockPlace.y
+            while (this.labelSpots.includes(tmp_x + '.' + tmp_y) && tmp_y <= blockPlace.height) {
+                if (tmp_x - blockPlace.x >= blockPlace.width) {
+                    tmp_y++
+                    tmp_x = blockPlace.x
+                } else {
+                    tmp_x++
+                }
             }
+            this.labelSpots.push(tmp_x + '.' + tmp_y)
+            label.style.left = 50 * (tmp_x - blockPlace.x) + 'px'
+            label.style.top = 50 * (tmp_y - blockPlace.y)+ 'px'
         }
-        this.labelSpots.push(tmp_x + '.' + tmp_y)
-        label.style.left = 50 * (tmp_x - blockPlace.x) + 'px'
-        label.style.top = 50 * (tmp_y - blockPlace.y)+ 'px'
 
         // when the place is clicked, display its information
         block.addEventListener('click', () => {
@@ -891,31 +948,33 @@
         linePlacesContainer.append(line)
 
         // add a label
-        const label = document.createElement('label')
-        label.append(document.createTextNode(linePlace.name))
-        label.className = ('placeLabel')
-        line.append(label)
-
-        // look for free place to put the label
-        const coordinates = searchPreliminaryLocations.bind(this)(linePlace.x1, linePlace.x2)
-        let tmp_x = linePlace.x1, tmp_y = linePlace.x2
-        if (coordinates === null) {
-            while (this.labelSpots.includes(tmp_x + '.' + tmp_y) && tmp_y <= (linePlace.y2 - linePlace.y1)) {
-                if (tmp_x - linePlace.x1 >= linePlace.x2 - linePlace.x1) {
-                    tmp_y++
-                    tmp_x = linePlace.x1
-                } else {
-                    tmp_x++
+        if (linePlace.name !== '') {
+            const label = document.createElement('label')
+            label.append(document.createTextNode(linePlace.name))
+            label.className = ('placeLabel')
+            line.append(label)
+    
+            // look for free place to put the label
+            const coordinates = searchPreliminaryLocations.bind(this)(linePlace.x1, linePlace.x2)
+            let tmp_x = linePlace.x1, tmp_y = linePlace.x2
+            if (coordinates === null) {
+                while (this.labelSpots.includes(tmp_x + '.' + tmp_y) && tmp_y <= (linePlace.y2 - linePlace.y1)) {
+                    if (tmp_x - linePlace.x1 >= linePlace.x2 - linePlace.x1) {
+                        tmp_y++
+                        tmp_x = linePlace.x1
+                    } else {
+                        tmp_x++
+                    }
                 }
+            } else {
+                tmp_x = coordinates[0]
+                tmp_y = coordinates[1]
             }
-        } else {
-            tmp_x = coordinates[0]
-            tmp_y = coordinates[1]
+    
+            this.labelSpots.push(tmp_x + '.' + tmp_y)
+            label.style.left = (tmp_x - linePlace.x1) + 'px'
+            label.style.top = (tmp_y - linePlace.y1) + 'px'
         }
-
-        this.labelSpots.push(tmp_x + '.' + tmp_y)
-        label.style.left = (tmp_x - linePlace.x1) + 'px'
-        label.style.top = (tmp_y - linePlace.y1) + 'px'
         
         // when the place is clicked, display its information
         line.addEventListener('click', () => {
@@ -928,7 +987,8 @@
                     _current = linePlace
                 }
             } catch (error) { 
-                // control box not initialized -- not an issue, just continue execution
+                // control box not initialized - not an issue, just continue execution
+                console.log('Skipping updating info box - info box not initialized.')
             }
         })
 
@@ -958,18 +1018,20 @@
         node.classList.add('node', nodePlace.type)
         nodePlacesContainer.append(node)
         
-        // add a label
-        const label = document.createElement('label')
-        label.appendChild(document.createTextNode(nodePlace.name))
-        label.className = 'placeLabel'
-        node.append(label)
+        if (nodePlace.name !== '') {
+            // add a label
+            const label = document.createElement('label')
+            label.appendChild(document.createTextNode(nodePlace.name))
+            label.className = 'placeLabel'
+            node.append(label)
 
-        // look for free place to put the label
-        const coordinates = searchPreliminaryLocations.bind(this)(nodePlace.x, nodePlace.y)
-        let tmp_x = coordinates[0], tmp_y = coordinates[1]
-        this.labelSpots.push(tmp_x + '.' + tmp_y)
-        label.style.left = (tmp_x - nodePlace.x) * 50 + 'px'
-        label.style.top = (tmp_y - nodePlace.y) * 50 + 'px'
+            // look for free place to put the label
+            const coordinates = searchPreliminaryLocations.bind(this)(nodePlace.x, nodePlace.y)
+            let tmp_x = coordinates[0], tmp_y = coordinates[1]
+            this.labelSpots.push(tmp_x + '.' + tmp_y)
+            label.style.left = (tmp_x - nodePlace.x) * 50 + 'px'
+            label.style.top = (tmp_y - nodePlace.y) * 50 + 'px'
+        }
 
         // when the place is clicked, display its information
         node.addEventListener('click', () => {
@@ -990,7 +1052,8 @@
                     destLabel.textContent = 'Destination: ' + nodePlace.name
                 }
             } catch (error) {
-                if (_VERBOSE) console.log('skipping updating info box -- info box not initialized.')
+                // control box not initialized - not an issue, just continue execution
+                console.log('Skipping updating info box - info box not initialized.')
             }
         })
 
@@ -1022,7 +1085,7 @@
         controlCentre.append(legend)
 
         // add a title
-        const label = document.createElement('h3')
+        const label = document.createElement('h4')
         label.append(document.createTextNode('Legend'))
         legend.append(label)
 
@@ -1069,7 +1132,7 @@
         controlCentre.append(filterBox)
         
         // add a title
-        const label = document.createElement('h3')
+        const label = document.createElement('h4')
         label.append(document.createTextNode(title))
         filterBox.append(label)
 

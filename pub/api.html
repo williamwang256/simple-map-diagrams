@@ -20,17 +20,12 @@
 
         <!-- Navigation bar -->
         <div id="topNavBar">
-          <ul>
-              <li>
-                <a class="navButton" href="index.html">Home</a>
-              </li>
-              <li>
-                <a class="navButton" href="examples.html">Examples</a>
-              </li>
-              <li>
-                <a class="navButton" href="api.html">API</a>
-              </li>
-          </ul>
+            <ul>
+                <li><a class="navButton" href="index.html">Home</a></li>
+                <li><a class="navButton" href="examples.html">Examples</a></li>
+                <li><a class="navButton" href="api.html">API</a></li>
+                <li><a class="navButton" href="about.html">About</a></li>
+            </ul>
         </div>
 
         <!-- Information below -->
@@ -81,7 +76,8 @@
 
             <h3><code>smdInstance.defaultSetUp()</code></h3>
             <ul>
-                <li>Completes a default setup of the map diagram, including all available features.</li>
+                <li>Completes a default setup of the map diagram, including all available features.
+                    Note: must be called after creating all places on the map that are to be included.</li>
                 <li>Arguments: N/A.</li>
                 <li>Return: N/A.</li>
             </ul>
@@ -104,7 +100,7 @@
             </ul>
             <br>
 
-            <h3><code>smdInstance.addBlockPlace(x, y, width, height, name, type, description)</code></h3>
+            <h3><code>smdInstance.addBlockPlace(x, y, width, height, type, name, description)</code></h3>
             <ul>
                 <li>Adds a block place to the map, i.e., a place that falls BETWEEN the connections on the map. 
                     Note: type must match one of the pre-defined types in the CSS file.</li>
@@ -113,7 +109,7 @@
             </ul>
             <br>
 
-            <h3><code>smdInstance.addLinePlace(x1, y1, x2, y2, name, type, description)</code></h3>
+            <h3><code>smdInstance.addLinePlace(x1, y1, x2, y2, type, name, description)</code></h3>
             <ul>
                 <li>Adds a line place to the map, i.e., a place that falls ON a connection on the map. 
                     Note: type must match one of the pre-defined types in the CSS file.</li>
@@ -122,7 +118,7 @@
             </ul>
             <br>
 
-            <h3><code>smdInstance.addNodePlace(x, y, name, type, description)</code></h3>
+            <h3><code>smdInstance.addNodePlace(x, y, type, name, description)</code></h3>
             <ul>
                 <li>Adds a node place to the map, i.e., a place that falls ON a NODE of the map. 
                     Note: type must match one of the pre-defined types in the CSS file.</li>

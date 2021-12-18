@@ -96,13 +96,13 @@
          * Input: the x-y coordinates, width and height, name, title, and description of the place.
          * Return: true on success, false on failure (e.g., unrecognized type).
          */
-        addBlockPlace: function(x, y, width, height, name, type, description) {
+        addBlockPlace: function(x, y, width, height, type, name, description) {
             if (!validator(x, y) || !validator(width, height)) return false     // validate input
             if (x + width >= this.width) return false
             if (y + height >= this.height) return false
             try {
                 if (_placeTypeMap.get(type)[1] !== 'block') return false        // unrecognized type
-                const blockPlace = new BlockPlace(x, y, width, height, name, type, description)
+                const blockPlace = new BlockPlace(x, y, width, height, type, name, description)
                 createBlockPlace.bind(this)(blockPlace)
                 this.blockPlaces.push(blockPlace)
             } catch (error) {
@@ -118,11 +118,11 @@
          * Input: the x-y coordinates of the start and end, name, title, and description of the place.
          * Return: true on success, false on failure (e.g., unrecognized type).
          */
-        addLinePlace: function(x1, y1, x2, y2, name, type, description) {
+        addLinePlace: function(x1, y1, x2, y2, type, name, description) {
             if (!validator(x1, y1) || !validator(x2, y2)) return false      // validate input
             try {
                 if (_placeTypeMap.get(type)[1] !== 'line') return false     // unrecognized type
-                const linePlace = new LinePlace(x1, y1, x2, y2, name, type, description)
+                const linePlace = new LinePlace(x1, y1, x2, y2, type, name, description)
                 createLinePlace.bind(this)(linePlace)
                 this.linePlaces.push(linePlace)
             } catch (error) {
@@ -138,11 +138,11 @@
          * Input: the x-y coordinates, name, title, and description of the place.
          * Return: true on success, false on failure (e.g., unrecognized type).
          */
-        addNodePlace: function(x, y, name, type, description) {
+        addNodePlace: function(x, y, type, name, description) {
             if (!validator(x, y)) return false
             try {
                 if (_placeTypeMap.get(type)[1] !== 'node') return false
-                const nodePlace = new NodePlace(x, y, name, type, description)
+                const nodePlace = new NodePlace(x, y, type, name, description)
                 createNodePlace.bind(this)(nodePlace)
                 this.nodePlaces.push(nodePlace)
             } catch (error) {
@@ -210,13 +210,13 @@
          * Input: the x-y coordinates, width, height (all non-negative integers), and the
          * name, type, and description of the place.
          */
-        constructor(x, y, width, height, name, type, description) {
+        constructor(x, y, width, height, type, name, description) {
             this.x = x
             this.y = y
             this.width = width
             this.height = height
             this.name = name
-            this.class = type
+            this.type = type
             this.description = description
         }
 
@@ -243,13 +243,13 @@
          * Input: the x-y coordinates (non-negative integers) of both endpoints, the name, type, and 
          * description of the line place.
          */
-        constructor(x1, y1, x2, y2, name, type, description) {
+        constructor(x1, y1, x2, y2, type, name, description) {
             this.x1 = x1
             this.y1 = y1
             this.x2 = x2
             this.y2 = y2
             this.name = name
-            this.class = type
+            this.type = type
             this.description = description
         }
 
@@ -276,11 +276,11 @@
          * Input: the x-y coordinates (integers), name, type, and description of the 
          * node place.
          */
-        constructor(x, y, name, type, description) {
+        constructor(x, y, type, name, description) {
             this.x = x
             this.y = y
             this.name = name
-            this.class = type
+            this.type = type
             this.description = description
         }
 
@@ -364,7 +364,7 @@
     function getPlacesByType(type, elements) {
         const list = []
         elements.map((element) => {
-            if (element.class === type) {
+            if (element.type === type) {
                 list.push(element.getID(this.id))
             }
         })
@@ -396,8 +396,8 @@
     function getAllItemClasses(elements) {
         const list = []
         elements.map((element) => {
-            if (!list.includes(element.class)) {
-                list.push(element.class)
+            if (!list.includes(element.type)) {
+                list.push(element.type)
             }
         })
         return list
@@ -805,7 +805,7 @@
         // create the block place based on the given information and add to document
         const block = document.createElement('div')
         block.id = blockPlace.getID(this.id)
-        block.classList.add('block', blockPlace.class)
+        block.classList.add('block', blockPlace.type)
         block.style.width = (blockPlace.width * 50 - 5) + 'px'
         block.style.height = (blockPlace.height * 50 - 5) + 'px'
         block.style.left = (blockPlace.x * 50 + 60) + 'px'
@@ -873,7 +873,7 @@
         // create the line place based on the given information and add to document
         const line = document.createElement('div')
         line.id = linePlace.getID(this.id)
-        line.classList.add('line', linePlace.class)
+        line.classList.add('line', linePlace.type)
 
         // determine the width of the line
         let width = 5;
@@ -950,12 +950,12 @@
         // create the node place based on the given information and add to document
         const node = document.createElement('div')
         node.id = nodePlace.getID(this.id)
-        node.className = nodePlace.class
+        node.className = nodePlace.type
 
         // determine placement
         node.style.left = nodePlace.x * 50 + 50 + 'px'
         node.style.top = nodePlace.y * 50 + 50 + 'px'
-        node.classList.add('node', nodePlace.class)
+        node.classList.add('node', nodePlace.type)
         nodePlacesContainer.append(node)
         
         // add a label

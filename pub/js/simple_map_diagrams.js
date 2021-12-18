@@ -79,6 +79,7 @@
             }
             // add the connection
             addConnection.bind(this)(x1, y1, x2, y2)
+            return true
         },
 
         /***
@@ -102,12 +103,13 @@
                 }
                 // add the connection
                 addConnection.bind(this)(element[0], element[1], element[2], element[3])
+                return true
             })
         },
 
         /***
          * API function to add a block place to the map. 
-         * Note: type must match one of the pre-defined types in the CSS file.
+         * Note: type must match one of the pre-defined types.
          * 
          * Input: the x-y coordinates, width and height, name, title, and description of the place.
          * Return: true on success, false on failure (e.g., unrecognized type).
@@ -144,7 +146,7 @@
 
         /***
          * API function to add a line place to the map. 
-         * Note: type must match one of the pre-defined types in the CSS file.
+         * Note: type must match one of the pre-defined types.
          * 
          * Input: the x-y coordinates of the start and end, name, title, and description of the place.
          * Return: true on success, false on failure (e.g., unrecognized type).
@@ -177,7 +179,7 @@
 
         /***
          * API function to add a node place to the map. 
-         * Note: type must match one of the pre-defined types in the CSS file.
+         * Note: type must match one of the pre-defined types.
          * 
          * Input: the x-y coordinates, name, title, and description of the place.
          * Return: true on success, false on failure (e.g., unrecognized type).
@@ -260,7 +262,7 @@
 
         /***
          * Constructor for the BlockPlace class.
-         * Note: type must match one of the pre-defined types in the CSS file. This is 
+         * Note: type must match one of the pre-defined types. This is 
          * assumed to have been already verifed prior to calling this constructor.
          * 
          * Input: the x-y coordinates, width, height (all non-negative integers), and the
@@ -293,7 +295,7 @@
 
         /***
          * Constructor for the LinePlace class.
-         * Note: type must match one of the pre-defined types in the CSS file. This is 
+         * Note: type must match one of the pre-defined types. This is 
          * assumed to have been already verifed prior to calling this constructor.
          * 
          * Input: the x-y coordinates (non-negative integers) of both endpoints, the name, type, and 
@@ -326,7 +328,7 @@
 
         /***
          * Constructor for the NodePlace class.
-         * Note: type must match one of the pre-defined types in the CSS file. This is 
+         * Note: type must match one of the pre-defined types. This is 
          * assumed to have been already verifed prior to calling this constructor.
          * 
          * Input: the x-y coordinates (integers), name, type, and description of the 

@@ -62,7 +62,7 @@
                 const smd = new SimpleMapDiagram(10, 5, 'sample title', 'sample description', 'example1') <br>
             </code>
             <p>
-                This line will go through a series of tasks to set up all the necessary objects and containers needed 
+                This call will go through a series of tasks to set up all the necessary objects and containers needed 
                 for the map, and add it to the document, under the container specified by the given id (in this case, 
                 the element with id 'example1'). Once this is done, you are ready to start customizing the map! See 
                 the list of API functions below for instructions on how to do so.
@@ -76,8 +76,10 @@
 
             <h3><code class="inlineCode">smdInstance.defaultSetUp()</code></h3>
             <ul>
-                <li>Completes a default setup of the map diagram, including all available features.
-                    Note: must be called after creating all places on the map that are to be included.</li>
+                <li>Completes a default setup of the map diagram, including all available features. You may choose
+                    not to use this function, and instead add individual features separately. This gives you the
+                    freedom to customize the layout of your website as you choose (refer to the functions at the end of
+                    this list). Note: must be called after creating all places on the map that are to be included.</li>
                 <li>Arguments: N/A.</li>
                 <li>Return: N/A.</li>
             </ul>
@@ -102,8 +104,8 @@
 
             <h3><code class="inlineCode">smdInstance.addBlockPlace(x, y, width, height, type, name, description)</code></h3>
             <ul>
-                <li>Adds a block place to the map, i.e., a place that falls BETWEEN the connections on the map. 
-                    Note: type must match one of the pre-defined types in the CSS file.</li>
+                <li>Adds a block place to the map, i.e., a place that falls between the connections on the map. 
+                    Note: type must match one of the pre-defined types below.</li>
                 <li>Arguments: the x-y coordinates, width and height, name, title, and description of the place.</li>
                 <li>Return: true on success, false on failure (e.g., unrecognized type).</li>
             </ul>
@@ -111,8 +113,8 @@
 
             <h3><code class="inlineCode">smdInstance.addLinePlace(x1, y1, x2, y2, type, name, description)</code></h3>
             <ul>
-                <li>Adds a line place to the map, i.e., a place that falls ON a connection on the map. 
-                    Note: type must match one of the pre-defined types in the CSS file.</li>
+                <li>Adds a line place to the map, i.e., a place that falls on a connection on the map. 
+                    Note: type must match one of the pre-defined types below.</li>
                 <li>Arguments: the x-y coordinates of the start and end, name, title, and description of the place.</li>
                 <li>Return: true on success, false on failure (e.g., unrecognized type).</li>
             </ul>
@@ -120,8 +122,8 @@
 
             <h3><code class="inlineCode">smdInstance.addNodePlace(x, y, type, name, description)</code></h3>
             <ul>
-                <li>Adds a node place to the map, i.e., a place that falls ON a NODE of the map. 
-                    Note: type must match one of the pre-defined types in the CSS file.</li>
+                <li>Adds a node place to the map, i.e., a place that falls on a node of the map. 
+                    Note: type must match one of the pre-defined types below.</li>
                 <li>Arguments: the x-y coordinates of the start and end, name, title, and description of the place.</li>
                 <li>Return: true on success, false on failure (e.g., unrecognized type).</li>
             </ul>
@@ -145,7 +147,8 @@
 
             <h3><code class="inlineCode">smdInstance.addFilterByClassBox()</code></h3>
             <ul>
-                <li>API function to add a filter box which will give users the option to filter by certain place type.</li>
+                <li>API function to add a filter box which will give users the option to filter by certain place type.
+                    Note: must be called after places are added to map.</li>
                 <li>Arguments: N/A.</li>
                 <li>Return: N/A.</li>
             </ul>
@@ -153,7 +156,8 @@
 
             <h3><code class="inlineCode">smdInstance.addFilterByNameBox()</code></h3>
             <ul>
-                <li>API function to add a filter box which will give users the option to filter by certain place name.</li>
+                <li>API function to add a filter box which will give users the option to filter by certain place name.
+                    Note: must be called after places are added to map.</li>
                 <li>Arguments: N/A.</li>
                 <li>Return: N/A.</li>
             </ul>
@@ -161,7 +165,8 @@
 
             <h3><code class="inlineCode">smdInstance.addLegend()</code></h3>
             <ul>
-                <li>API function to add a legend to the map, based on the types of places that are already on the map.</li>
+                <li>API function to add a legend to the map, based on the types of places that are already on the map.
+                    Note: must be called after places are added to map.</li>
                 <li>Arguments: N/A.</li>
                 <li>Return: N/A.</li>
             </ul>

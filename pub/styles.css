@@ -1,4 +1,4 @@
-/* SMD demonstration pages CSS */
+/* SMD landing page CSS */
 
 body {
 	margin:0; 
@@ -12,14 +12,14 @@ body {
 }
 
 #topNavBar {
-	background-color: black;
+	background-color: #ffc420;
 	margin-bottom: 10px;
 }
 
 #topNavBar ul {
-	padding: 5px;
+	padding: 20px;
 	margin: 0px;
-    margin-left: 50px;
+    text-align: center;
 }
 
 #topNavBar ul li {
@@ -30,30 +30,41 @@ body {
 .navButton {
 	text-decoration: none;
 	padding: 10px;
-	color: white;
+	color: #262035
 }
 
 .navButton:hover  {
-	color: #669df6;
+	color: #ffa115;
 	text-decoration: none;
-	padding: 10px;
 }
 
 .header {
-	background-color: #00204E; 
+	background-color: #262035; 
 	height: 50px; 
 	margin: 0; 
-	padding: 50px
+	padding-left: 50px;
+	padding-top: 50px;
+	padding-bottom: 90px;
 }
 
 .headerText {
 	margin: 0px 10px; 
-	color: white;
+	font-size: 50px;
+	color: #ffd562;
+	text-align: center;
+	font-family: New Baskerville, serif;
+}
+
+.subtitle {
+	color: #3f3043;
+	font-family: New Baskerville, serif;
 }
 
 .subHeaderText {
 	margin: 5px 10px;
-	color: #669df6;
+	color: #e1e4ee;
+	text-align: center;
+	font-size: 12px;
 }
 
 /* Code demonstration CSS */
@@ -72,10 +83,10 @@ body {
 	color: #888888;
 }
 
-/* Home Page CSS */
+/* Home Page  */
 
 #landingPageBody {
-	background-color: rgb(229, 234, 240);
+	background-color: #262035;
 }
 
 #landingPageTitleText {
@@ -85,17 +96,19 @@ body {
 .landingPageTitle {
 	top:270px;
 	text-align: center;
-	background-color: #00204E;
+	background-color: #262035;
 	padding: 50px;
 	position: fixed;
 	width:100%;
 	z-index: 10;
+	border-top: 10px solid #ffc420;
 }
 
 #landingPageNavBar {
-	background-color: black;
+	background-color: #ffc420;
 	position: fixed;
-	top: 490px;
+	top: 470px;
+	padding-top: 10px;
 	margin-bottom: 10px;
 	font-size: 30px;
 	z-index: 10;

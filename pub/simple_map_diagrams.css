@@ -96,7 +96,7 @@
 }
 
 .hospital {
-    background-color: lightpink;
+    background-color: #fce8e6;
 }
 
 /* nodes css */
@@ -194,6 +194,11 @@
 
 /* misc. css */
 
+.mapTitle {
+	color: #3f3043;
+	font-family: New Baskerville, serif;
+}
+
 .highlight {
     font-weight: bold;
     box-shadow: 0 0 20px red;
@@ -218,7 +223,7 @@
 .controlLabel {
     font-size: 12px;
     margin: 5px;
-    color: grey;
+    color: #aaa49f;;
     padding: 5px;
 }
 

@@ -604,6 +604,7 @@
         const subtitle = document.createElement('label')
 
         subtitle.className = 'controlLabel'
+        titleElement.className = 'mapTitle'
         titleContainer.className = 'titleContainer'
         titleContainer.id = this.id + '.titleContainer'
 

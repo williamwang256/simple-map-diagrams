@@ -1,3 +1,5 @@
+/* CSS file for the Simple Map Diagrams Library */
+
 .SMDlist{
     list-style: none;
 }
@@ -96,7 +98,7 @@
 }
 
 .hospital {
-    background-color: #fce8e6;
+    background-color: lightpink;
 }
 
 /* nodes css */
@@ -140,7 +142,7 @@
 .navigationEndPoint {
     border: 3px solid darkcyan;
     background-color: #669df6;
-    box-shadow: 0 0 10px #669df6    ;
+    box-shadow: 0 0 10px #669df6;
 }
 
 /* containers css */

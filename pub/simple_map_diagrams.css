@@ -68,6 +68,14 @@
     background-color: gold;
 }
 
+.transitLine1 {
+    background-color: green;
+}
+
+.highway {
+    background-color: orange;
+}
+
 /* blocks css */
 
 .block {

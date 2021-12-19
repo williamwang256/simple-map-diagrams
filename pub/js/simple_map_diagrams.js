@@ -19,7 +19,12 @@
         this.blockPlaces = []       // list to store the block places
         this.linePlaces = []        // list to store the line places
         this.nodePlaces = []        // list to store the node places
-        this.labelSpots = []        // list to store the spots occupied by labels
+
+        // some variables to help with navigation and placement
+        this.labelSpots = []        
+        this.source = undefined
+        this.destination = undefined
+        this.state = 'view'
 
         // width and height of the map
         this.width = width
@@ -30,16 +35,13 @@
         _id++
 
         // do some preliminary setup
-        mapSetUp.bind(this)(title, description)
-        initializeNodes.bind(this)(this.width, this.height)
+        _mapSetUp.bind(this)(title, description)
+        _initializeNodes.bind(this)(this.width, this.height)
     }
 
     // some global (private) variables
     let _id = 0                     // global id counter
-    let _source = undefined         // global source - used for navigation
-    let _destination = undefined    // global destination - used for navigation
-    let _state = 'view'             // global state - used for navigation buttons
-    
+
     // a global map between places class names, and actual display names
     let _placeTypeMap = new Map()
     _placeTypeMap.set('park', ['Park', 'block'])
@@ -48,6 +50,8 @@
     _placeTypeMap.set('hospital', ['Hospital', 'block'])
     _placeTypeMap.set('street', ['Street', 'line'])
     _placeTypeMap.set('transitLine', ['Transit Line', 'line'])
+    _placeTypeMap.set('transitLine1', ['Transit Line', 'line'])
+    _placeTypeMap.set('highway', ['Highway', 'line'])
     _placeTypeMap.set('poi', ['Point of Interest', 'node'])
     _placeTypeMap.set('specialEvent', ['Special Event', 'node'])
     _placeTypeMap.set('incident', ['Incident', 'node'])
@@ -58,7 +62,7 @@
          * API function to do the default setup. Includes all availible menus.
          */
         defaultSetUp: function() {
-            defaultInitialize.bind(this)()
+            _defaultInitialize.bind(this)()
         },
 
         /***
@@ -71,14 +75,14 @@
             // validate input to API function given by developer
             const invalid = 
                 !(x1 === x2 || y1 === y2) || 
-                !validator.bind(this)(x1, y2) || 
-                !validator.bind(this)(x2, y2)
+                !_validator.bind(this)(x1, y2) || 
+                !_validator.bind(this)(x2, y2)
             if (invalid) {
                 console.log('Invalid coordinates')
                 return false
             }
             // add the connection
-            addConnection.bind(this)(x1, y1, x2, y2)
+            _addConnection.bind(this)(x1, y1, x2, y2)
             return true
         },
 
@@ -95,14 +99,14 @@
                 const x1 = element[0], y1 = element[1], x2 = element[2], y2 = element[3]
                 const invalid = 
                     !(x1 === x2 || y1 === y2) || 
-                    !validator.bind(this)(x1, y1) || 
-                    !validator.bind(this)(x2, y2)
+                    !_validator.bind(this)(x1, y1) || 
+                    !_validator.bind(this)(x2, y2)
                 if (invalid) {
                     console.log('Could not add connection: invalid coordinates')
                     return false
                 }
                 // add the connection
-                addConnection.bind(this)(element[0], element[1], element[2], element[3])
+                _addConnection.bind(this)(element[0], element[1], element[2], element[3])
                 return true
             })
         },
@@ -117,8 +121,8 @@
         addBlockPlace: function(x, y, width, height, type, name, description) {
             // validate input to API function given by developer
             const invalid = 
-                !validator.bind(this)(x, y) || 
-                !validator.bind(this)(width, height) ||
+                !_validator.bind(this)(x, y) || 
+                !_validator.bind(this)(width, height) ||
                 x + width >= this.width
                 y + height >= this.height
             if (invalid) {
@@ -136,7 +140,7 @@
                     return false        
                 }
                 const blockPlace = new BlockPlace(x, y, width, height, type, name, description)
-                createBlockPlace.bind(this)(blockPlace)
+                _createBlockPlace.bind(this)(blockPlace)
                 this.blockPlaces.push(blockPlace)
             } catch (error) {
                 return false
@@ -153,7 +157,7 @@
          */
         addLinePlace: function(x1, y1, x2, y2, type, name, description) {
             // validate input to API function given by developer
-            const invalid = !validator.bind(this)(x1, y1) || !validator.bind(this)(x2, y2)
+            const invalid = !_validator.bind(this)(x1, y1) || !_validator.bind(this)(x2, y2)
             if (invalid) {
                 console.log('Could not add place: invalid coordinates.')
                 return false
@@ -169,7 +173,7 @@
                     return false        
                 }
                 const linePlace = new LinePlace(x1, y1, x2, y2, type, name, description)
-                createLinePlace.bind(this)(linePlace)
+                _createLinePlace.bind(this)(linePlace)
                 this.linePlaces.push(linePlace)
             } catch (error) {
                 return false
@@ -186,7 +190,7 @@
          */
         addNodePlace: function(x, y, type, name, description) {
             // validate input to API function given by developer
-            if (!validator.bind(this)(x, y)) {
+            if (!_validator.bind(this)(x, y)) {
                 console.log('Could not add place: invalid coordinates.')
                 return false
             }
@@ -201,7 +205,7 @@
                     return false        
                 }
                 const nodePlace = new NodePlace(x, y, type, name, description)
-                createNodePlace.bind(this)(nodePlace)
+                _createNodePlace.bind(this)(nodePlace)
                 this.nodePlaces.push(nodePlace)
             } catch (error) {
                 return false
@@ -213,14 +217,14 @@
          * API function to add a box to the map to display information about places.
          */
         addInfoBox: function() {
-            initializeInfoBox.bind(this)()
+            _initializeInfoBox.bind(this)()
         },
 
         /***
          * API function to add a navigation menu to the map.
          */
         addNavigationMenu: function() {
-            initializeNavigationMenu.bind(this)()
+            _initializeNavigationMenu.bind(this)()
         },
 
         /***
@@ -231,7 +235,7 @@
          */
         addFilterByClassBox: function() {
             const all_places = this.blockPlaces.concat(this.linePlaces).concat(this.nodePlaces)
-            addFilterMenu.bind(this)(getAllItemClasses(all_places), 'Filter items by type:', all_places, getPlacesByType)
+            _addFilterMenu.bind(this)(_getAllItemClasses(all_places), 'Filter items by type:', all_places, _getPlacesByType)
         },
 
         /***
@@ -240,16 +244,16 @@
          */
         addFilterByNameBox: function() {
             const all_places = this.blockPlaces.concat(this.linePlaces).concat(this.nodePlaces)
-            addFilterMenu.bind(this)(getAllItemNames(all_places), 'Filter items by name:', all_places, getPlaceByName)
+            _addFilterMenu.bind(this)(_getAllItemNames(all_places), 'Filter items by name:', all_places, _getPlaceByName)
         },
 
         /***
          * API function to add a legend to the map.
          */
         addLegend: function() {
-            addLegend(getAllItemClasses(this.blockPlaces)
-            .concat(getAllItemClasses(this.linePlaces))
-            .concat(getAllItemClasses(this.nodePlaces), this.id))
+            _addLegend(_getAllItemClasses(this.blockPlaces)
+            .concat(_getAllItemClasses(this.linePlaces))
+            .concat(_getAllItemClasses(this.nodePlaces), this.id))
         }
     }
 
@@ -386,30 +390,30 @@
     /***
      * Function to perform default set up tasks.
      */
-    function defaultInitialize() {
-        initializeInfoBox.bind(this)()
-        initializeNavigationMenu.bind(this)()
-        addLegend.bind(this)(
-            getAllItemClasses(this.blockPlaces)
-            .concat(getAllItemClasses(this.linePlaces)) 
-            .concat(getAllItemClasses(this.nodePlaces)), this.id
+    function _defaultInitialize() {
+        _initializeInfoBox.bind(this)()
+        _initializeNavigationMenu.bind(this)()
+        _addLegend.bind(this)(
+            _getAllItemClasses(this.blockPlaces)
+            .concat(_getAllItemClasses(this.linePlaces)) 
+            .concat(_getAllItemClasses(this.nodePlaces)), this.id
         )
 
         // get all the places on the map
         const all_places = this.blockPlaces.concat(this.linePlaces).concat(this.nodePlaces)
 
-        addFilterMenu.bind(this)(
-            getAllItemClasses(all_places), 
+        _addFilterMenu.bind(this)(
+            _getAllItemClasses(all_places), 
             'Filter items by type:', 
             all_places, 
-            getPlacesByType
+            _getPlacesByType
             
         )
-        addFilterMenu.bind(this)(
-            getAllItemNames(all_places), 
+        _addFilterMenu.bind(this)(
+            _getAllItemNames(all_places), 
             'Filter items by name:', 
             all_places, 
-            getPlaceByName
+            _getPlaceByName
         )
     }
 
@@ -419,7 +423,7 @@
      * Input: the class of elements to get, and a list of elements to filter from.
      * Returns: a list of ids of elements.
      */
-    function getPlacesByType(type, elements) {
+    function _getPlacesByType(type, elements) {
         const list = []
         elements.map((element) => {
             if (element.type === type) {
@@ -435,7 +439,7 @@
      * Input: the name of the element to get, and a list of elements to filter from.
      * Returns: a list of ids of elements.
      */
-    function getPlaceByName(name, elements) {
+    function _getPlaceByName(name, elements) {
         const list = []
         elements.map((element) => {
             if (element.name === name) {
@@ -451,7 +455,7 @@
      * Input: a list of elements to filter from.
      * Returns: a list of classes.
      */
-    function getAllItemClasses(elements) {
+    function _getAllItemClasses(elements) {
         const list = []
         elements.map((element) => {
             if (!list.includes(element.type)) {
@@ -467,7 +471,7 @@
      * Input: a list of elements to filter from.
      * Returns: a list of classes.
      */
-    function getAllItemNames(elements) {
+    function _getAllItemNames(elements) {
         const list = []
         elements.map((element) => {
             if (!list.includes(element.name)) {
@@ -483,7 +487,7 @@
      * Input: the x-y coordinate of the place.
      * Returns: the x-y coordinate of a free space if found, null otherwise.
      */
-    function searchPreliminaryLocations(x, y) {
+    function _searchPreliminaryLocations(x, y) {
         let tmp_x = x, tmp_y = y
         if (!this.labelSpots.includes(tmp_x + '.' + tmp_y)) {
             // nothing to do here
@@ -508,7 +512,7 @@
      * Returns: a list of the nodes along the path if a path was found, 
      * undefined otherwise.
      */
-    function findShortestPath(x1, y1, x2, y2) {
+    function _findShortestPath(x1, y1, x2, y2) {
         // initialization
         this.nodes[x1][y1].visited = true
         const queue = []
@@ -542,7 +546,7 @@
      * Function to clear the tree structure formed by findShortestPath(), and remove the 
      * navigation path that was displayed on the map.
      */
-    function clearNavigation() {
+    function _clearNavigation() {
         // clear the tree structure
         this.nodes.map((column) => {
             column.map((node) => {
@@ -571,7 +575,7 @@
      * Input: the x-y coordinates.
      * Return: true if valid, false otherwise.
      */
-    function validator(x, y) {
+    function _validator(x, y) {
         if (x < 0 || x >= this.width) return false
         if (y < 0 || y >= this.height) return false
         return true
@@ -585,7 +589,7 @@
      * 
      * Input: the title and description of the map.
      */
-    function mapSetUp(title, description) {
+    function _mapSetUp(title, description) {
         const body = this.container
 
         // create a container for this Simple Map Diagram
@@ -656,7 +660,7 @@
     /***
      * DOM manipulation function to initialize the information box beneath the map.
      */
-    function initializeInfoBox() {
+    function _initializeInfoBox() {
         const mapContainer = document.getElementById(this.id + '.mapContainer')
         const controlBox = document.createElement('div')
         controlBox.className = 'underBox'
@@ -677,7 +681,7 @@
     /***
      * DOM manipulation function to create a navigation menu.
      */
-    function initializeNavigationMenu() {
+    function _initializeNavigationMenu() {
         const mapContainer = document.getElementById(this.id + '.mapContainer')
         const navigationBox = document.createElement('div')
         navigationBox.className = 'underBox'
@@ -711,14 +715,14 @@
         srcButton.classList.add('SMDbutton')
         navigationBox.append(srcButton)
         srcButton.append(document.createTextNode('Choose starting point'))
-        srcButton.addEventListener('click', () => { _state = 'selectSrc' })
+        srcButton.addEventListener('click', () => { this.state = 'selectSrc' })
 
         // button to mark the destination
         const destButton = document.createElement('button')
         destButton.classList.add('SMDbutton')
         navigationBox.append(destButton)
         destButton.append(document.createTextNode('Choose destination'))
-        destButton.addEventListener('click', () => { _state = 'selectDest' })
+        destButton.addEventListener('click', () => { this.state = 'selectDest' })
 
         // button to display navigation on screen
         const navigateButton = document.createElement('button')
@@ -727,25 +731,25 @@
         navigateButton.append(document.createTextNode('Navigate!'))
         navigateButton.classList.add('submitButton')
         navigateButton.addEventListener('click', () => {
-            clearNavigation.bind(this)()
-            if (_source === undefined || _destination === undefined) {
+            _clearNavigation.bind(this)()
+            if (this.source === undefined || this.destination === undefined) {
                 alert('Missing source or destination.')
             } else {
-                const path = findShortestPath.bind(this)(
-                    _source.x, 
-                    _source.y, 
-                    _destination.x, 
-                    _destination.y,
+                const path = _findShortestPath.bind(this)(
+                    this.source.x, 
+                    this.source.y, 
+                    this.destination.x, 
+                    this.destination.y,
                 )
                 if (path === undefined) {
                     alert('Could not find a path.')
-                    clearNavigation.bind(this)()
+                    _clearNavigation.bind(this)()
                 } else {
-                    drawPath.bind(this)(path)
+                    _drawPath.bind(this)(path)
                 }
-                _source = undefined
-                _destination = undefined
-                _state = 'view'
+                this.source = undefined
+                this.destination = undefined
+                this.state = 'view'
             }
         })
 
@@ -756,8 +760,8 @@
         mapContainer.insertBefore(clearButton, mapContainer.firstChild)
         clearButton.classList.add('mapButton')
         clearButton.addEventListener('click', () => {
-            clearAllHighlights.bind(this)()
-            clearNavigation.bind(this)()
+            _clearAllHighlights.bind(this)()
+            _clearNavigation.bind(this)()
         })
 
         // add to the document
@@ -767,7 +771,7 @@
     /***
      * DOM manipulation function to initialize a grid of nodes.
      */
-    function initializeNodes() {
+    function _initializeNodes() {
         const nodesContainer = document.getElementById(this.id + '.nodes')
 
         // initialize a 2D grid of nodes, organized using unordered lists
@@ -789,13 +793,13 @@
                 this.nodes[i][j] = newNode
 
                 node.addEventListener('click', () => {
-                    if (_state === 'selectSrc') {
+                    if (this.state === 'selectSrc') {
                         const srcLabel = document.getElementById(this.id + '.srcLabel')
-                        _source = this.nodes[i][j]
+                        this.source = this.nodes[i][j]
                         srcLabel.textContent = 'Source: unnamed intersection'
-                    } else if (_state === 'selectDest') {
+                    } else if (this.state === 'selectDest') {
                         const destLabel = document.getElementById(this.id + '.destLabel')
-                        _destination = this.nodes[i][j]
+                        this.destination = this.nodes[i][j]
                         destLabel.textContent = 'Destination: unnamed intersection'
                     }
                 })
@@ -809,7 +813,7 @@
      * 
      * Input: the x-y coordinates of both nodes.
      */
-    function addConnection(x1, y1, x2, y2) {
+    function _addConnection(x1, y1, x2, y2) {
         // create an element and add it to the document
         const connectionsContainer = document.getElementById(this.id + '.connectionsContainer')
         const line = document.createElement('div')
@@ -856,7 +860,7 @@
      * 
      * Input: a blockPlace object, containing all required info about the block place.
      */
-    function createBlockPlace(blockPlace) {
+    function _createBlockPlace(blockPlace) {
         const blockPlacesContainer = document.getElementById(this.id + '.blockPlacesContainer')
         
         // create the block place based on the given information and add to document
@@ -894,19 +898,19 @@
         // when the place is clicked, display its information
         block.addEventListener('click', () => {
             try {
-                if (_state === 'view') {
+                if (this.state === 'view') {
                     const infoLabel = document.getElementById(this.id + '.selectedLabel')
                     const descriptionLabel = document.getElementById(this.id + '.descLabel')
                     infoLabel.textContent = blockPlace.name
                     descriptionLabel.textContent = blockPlace.description
                     _current = blockPlace
-                } else if (_state === 'selectSrc') {
+                } else if (this.state === 'selectSrc') {
                     const srcLabel = document.getElementById(this.id + '.srcLabel')
-                    _source = blockPlace
+                    this.source = blockPlace
                     srcLabel.textContent = 'Source: ' + blockPlace.name
-                } else if (_state === 'selectDest') {
+                } else if (this.state === 'selectDest') {
                     const destLabel = document.getElementById(this.id + '.destLabel')
-                    _destination = blockPlace
+                    this.destination = blockPlace
                     destLabel.textContent = 'Destination: ' + blockPlace.name
                 }
             } catch (error) {
@@ -926,7 +930,7 @@
      * 
      * Input: a blockPlace object, containing all required info about the block place.
      */
-    function createLinePlace(linePlace) {
+    function _createLinePlace(linePlace) {
         const linePlacesContainer = document.getElementById(this.id + '.linePlacesContainer')
         
         // create the line place based on the given information and add to document
@@ -957,7 +961,7 @@
             line.append(label)
     
             // look for free place to put the label
-            const coordinates = searchPreliminaryLocations.bind(this)(linePlace.x1, linePlace.x2)
+            const coordinates = _searchPreliminaryLocations.bind(this)(linePlace.x1, linePlace.x2)
             let tmp_x = linePlace.x1, tmp_y = linePlace.x2
             if (coordinates === null) {
                 while (this.labelSpots.includes(tmp_x + '.' + tmp_y) && tmp_y <= (linePlace.y2 - linePlace.y1)) {
@@ -981,7 +985,7 @@
         // when the place is clicked, display its information
         line.addEventListener('click', () => {
             try {
-                if (_state === 'view') {
+                if (this.state === 'view') {
                     const infoLabel = document.getElementById(this.id + '.selectedLabel')
                     const descriptionLabel = document.getElementById(this.id + '.descLabel')
                     infoLabel.textContent = linePlace.name
@@ -1006,7 +1010,7 @@
      * 
      * Input: a blockPlace object, containing all required info about the block place.
      */
-    function createNodePlace(nodePlace) {
+    function _createNodePlace(nodePlace) {
         const nodePlacesContainer = document.getElementById(this.id + '.nodePlacesContainer')
         
         // create the node place based on the given information and add to document
@@ -1028,7 +1032,7 @@
             node.append(label)
 
             // look for free place to put the label
-            const coordinates = searchPreliminaryLocations.bind(this)(nodePlace.x, nodePlace.y)
+            const coordinates = _searchPreliminaryLocations.bind(this)(nodePlace.x, nodePlace.y)
             let tmp_x = coordinates[0], tmp_y = coordinates[1]
             this.labelSpots.push(tmp_x + '.' + tmp_y)
             label.style.left = (tmp_x - nodePlace.x) * 50 + 'px'
@@ -1038,19 +1042,19 @@
         // when the place is clicked, display its information
         node.addEventListener('click', () => {
             try {
-                if (_state === 'view') {
+                if (this.state === 'view') {
                     const infoLabel = document.getElementById(this.id + '.selectedLabel')
                     const descriptionLabel = document.getElementById(this.id + '.descLabel')
                     infoLabel.textContent = nodePlace.name
                     descriptionLabel.textContent = nodePlace.description
                     _current = nodePlace
-                } else if (_state === 'selectSrc') {
+                } else if (this.state === 'selectSrc') {
                     const srcLabel = document.getElementById(this.id + '.srcLabel')
-                    _source = nodePlace
+                    this.source = nodePlace
                     srcLabel.textContent = 'Source: ' + nodePlace.name
-                } else if (_state === 'selectDest') {
+                } else if (this.state === 'selectDest') {
                     const destLabel = document.getElementById(this.id + '.destLabel')
-                    _destination = nodePlace
+                    this.destination = nodePlace
                     destLabel.textContent = 'Destination: ' + nodePlace.name
                 }
             } catch (error) {
@@ -1066,7 +1070,7 @@
     }
 
     /* function to toggle highlight on a block place with given id */
-    function toggleHighlightBlockPlace(id) {
+    function _toggleHighlightBlockPlace(id) {
         const element = document.getElementById(id)
         if (element.classList.contains('highlight')) {
             element.classList.remove('highlight')
@@ -1080,7 +1084,7 @@
      * 
      * Input: lists of all places on the map.
      */
-    function addLegend(places) {
+    function _addLegend(places) {
         const controlCentre = document.getElementById(this.id + '.controlCentre')
         const legend = document.createElement('div')
         legend.className = 'sideBox'
@@ -1127,7 +1131,7 @@
     /***
      * DOM manipulation function to add a menu to filter all places by type.
      */
-    function addFilterMenu(options, title, places, elementGetter) {
+    function _addFilterMenu(options, title, places, elementGetter) {
         const controlCentre = document.getElementById(this.id + '.controlCentre')
         const filterBox = document.createElement('div')
         filterBox.className = 'sideBox'
@@ -1159,9 +1163,9 @@
         submitButton.append(document.createTextNode('OK'))
         submitButton.addEventListener('click', () => {
             const elements = elementGetter.bind(this)(list.value, places)
-            clearAllHighlights.bind(this)()
+            _clearAllHighlights.bind(this)()
             elements.map((id) => {
-                toggleHighlightBlockPlace(id)
+                _toggleHighlightBlockPlace(id)
             })
         })
         filterBox.append(submitButton)
@@ -1172,7 +1176,7 @@
      * 
      * Input: the path to draw.
      */
-    function drawPath(path) {
+    function _drawPath(path) {
         // draw source
         const navigationContainer = document.getElementById(this.id + '.navigationContainer')
         const source = document.createElement('div')
@@ -1221,7 +1225,7 @@
     /***
      * DOM manipulation function to clear all highlighted items.
      */
-    function clearAllHighlights() {
+    function _clearAllHighlights() {
         const all_places = this.blockPlaces.concat(this.linePlaces).concat(this.nodePlaces)
         all_places.map((place) => {
             const element = document.getElementById(place.getID(this.id))

@@ -1,6 +1,4 @@
-# js-library-wangwi18
-
-## Simple Map Diagrams JavaScript Library
+# Simple Map Diagrams JavaScript Library
 
 Link to deployed landing page: https://fierce-shelf-08886.herokuapp.com/
 
